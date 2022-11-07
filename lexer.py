@@ -33,7 +33,7 @@ def inicio_lexer(data):
                 recol_operador = c
                 continue
             elif (c == '{' or c == '}' or c == '(' or c == ')' or
-                  c == ',' or c == ';' or (c == '*' and recol_comentario == '')):
+                  c == ',' or c == '.' or c == ';' or (c == '*' and recol_comentario == '')):
                 tabla.insertar(LexToken(c, None, None, 1))
                 continue
 
@@ -125,6 +125,10 @@ def inicio_lexer(data):
                     tabla.insertar(LexToken('VOID', None, None, 1))
                 elif recol_ident == 'mientras':
                     tabla.insertar(LexToken('WHILE', None, None, 1))
+                elif recol_ident == 'verdadero':
+                    tabla.insertar(LexToken('BOOLEAN_LIT', None, True, 1))
+                elif recol_ident == 'falso':
+                    tabla.insertar(LexToken('BOOLEAN_LIT', None, False, 1))
                 else:
                     tabla.insertar(LexToken('IDENT', recol_ident, None, 1))
                 recol_ident = ''
