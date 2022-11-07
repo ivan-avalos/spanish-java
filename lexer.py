@@ -9,9 +9,10 @@ def inicio_lexer(data):
     recol_caracter = ''
     recol_comentario = ''
     recol_operador = ''
+    recol_ident = ''
     
     for c in data + "\n":
-        print (c + ' (' + selector + ')')
+        # print (c + ' (' + selector + ')')
         
         if selector == '':
             # Entradas a tokens
@@ -21,28 +22,20 @@ def inicio_lexer(data):
             elif c == '\'':
                 selector = 'CHAR_LIT'
                 continue
+            elif c.isalpha() or c == '_':
+                selector = 'ID/RESERVADA'
             elif c == '/':
                 recol_comentario = '/'
-            elif (c == '=' or c == '+' or c == '-' or c == '&' or c == '|') and len(recol_operador) == 0:
+            elif (c == '=' or c == '+' or c == '-' or c == '&' or c == '|') and recol_operador == '':
                 recol_operador = c
                 continue
             elif c == '!' or c == '<' or c == '>':
                 recol_operador = c
                 continue
-            elif c == '{':
-                tabla.insertar(LexToken('{', None, None, 1))
-            elif c == '}':
-                tabla.insertar(LexToken('}', None, None, 1))
-            elif c == '(':
-                tabla.insertar(LexToken('(', None, None, 1))
-            elif c == ')':
-                tabla.insertar(LexToken(')', None, None, 1))
-            elif c == ',':
-                tabla.insertar(LexToken(',', None, None, 1))
-            elif c == ';':
-                tabla.insertar(LexToken(';', None, None, 1))
-            elif c == '*':
-                tabla.insertar(LexToken('*', None, None, 1))
+            elif (c == '{' or c == '}' or c == '(' or c == ')' or
+                  c == ',' or c == ';' or (c == '*' and recol_comentario == '')):
+                tabla.insertar(LexToken(c, None, None, 1))
+                continue
 
             # Apertura de comentario
             if recol_comentario == '/' and c == '*':
@@ -72,7 +65,6 @@ def inicio_lexer(data):
                 recol_string = ''
             else:
                 recol_string += c
-            continue
 
         # Caracteres
         if selector == 'CHAR_LIT':
@@ -86,7 +78,6 @@ def inicio_lexer(data):
                 tabla.insertar(LexToken('CHAR_LIT', None, recol_caracter, 1))
                 selector = ''
                 recol_caracter = ''
-                continue
             else:
                 recol_caracter += c
 
@@ -94,15 +85,51 @@ def inicio_lexer(data):
         if selector == 'COMMENT':
             if c == '*':
                 recol_comentario = c
-                continue
             elif recol_comentario == '*':
                 if c == '/':
                     selector = ''
                     recol_comentario = ''
-                    continue
                 else:
                     recol_comentario = ''
-                    continue
+
+        # Identificador o palabra reservada
+        if selector == 'ID/RESERVADA':
+            if c.isalnum() or c == '_':
+                recol_ident += c
+            else:
+                if recol_ident == 'booleano':
+                    tabla.insertar(LexToken('BOOLEAN', None, None, 1))
+                elif recol_ident == 'detener':
+                    tabla.insertar(LexToken('BREAK', None, None, 1))
+                elif recol_ident == 'byte':
+                    tabla.insertar(LexToken('BYTE', None, None, 1))
+                elif recol_ident == 'caracter':
+                    tabla.insertar(LexToken('CHAR', None, None, 1))
+                elif recol_ident == 'doble':
+                    tabla.insertar(LexToken('DOUBLE', None, None, 1))
+                elif recol_ident == 'sino':
+                    tabla.insertar(LexToken('ELSE', None, None, 1))
+                elif recol_ident == 'porcada':
+                    tabla.insertar(LexToken('FOR', None, None, 1))
+                elif recol_ident == 'si':
+                    tabla.insertar(LexToken('IF', None, None, 1))
+                elif recol_ident == 'entero':
+                    tabla.insertar(LexToken('INT', None, None, 1))
+                elif recol_ident == 'imprimir':
+                    tabla.insertar(LexToken('PRINT', None, None, 1))
+                elif recol_ident == 'leer':
+                    tabla.insertar(LexToken('READ', None, None, 1))
+                elif recol_ident == 'retorna':
+                    tabla.insertar(LexToken('RETURN', None, None, 1))
+                elif recol_ident == 'vacio':
+                    tabla.insertar(LexToken('VOID', None, None, 1))
+                elif recol_ident == 'mientras':
+                    tabla.insertar(LexToken('WHILE', None, None, 1))
+                else:
+                    tabla.insertar(LexToken('IDENT', recol_ident, None, 1))
+                recol_ident = ''
+                selector = ''
+                
 
     # Imprimir tabla de símbolos
     print (str(tabla))
