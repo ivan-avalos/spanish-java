@@ -6,7 +6,11 @@ from lexer import *
 class Main:
     input_file = None
     output_file = None
+
+    # GUI widgets
     text = None
+    msgarea = None
+    symbols = None
 
     def abrir_archivo(self):
         self.input_file = filedialog.askopenfilename()
@@ -34,9 +38,14 @@ class Main:
     def main_gui(self, argv):
         root = Tk()
         root.title ("Javañol")
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
 
         mainframe = ttk.Frame(root, padding="3 3 12 12")
         mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+        mainframe.columnconfigure(0, weight=1)
+        mainframe.rowconfigure(0, weight=1)
+        mainframe.rowconfigure(1, weight=0)
 
         # Menú
         win = Toplevel(root)
@@ -56,8 +65,27 @@ class Main:
     
         win['menu'] = menubar
 
+        # Editor de código
         self.text = Text(mainframe)
         self.text.grid(column=0, row=0, sticky=(N, W, E, S))
+
+        # Área de mensajes
+        msgarealf = LabelFrame(mainframe, text='Área de mensajes', height=10)
+        msgarealf.grid(column=0, row=1, sticky=(W, E, S))
+        
+        self.msgarea = Text(msgarealf, height=10)
+        self.msgarea.grid(column=0, row=0, sticky=(N, W, E, S))
+        self.msgarea.rowconfigure(0, weight=1)
+        self.msgarea.columnconfigure(0, weight=1)
+
+        # Tabla de símbolos
+        symbolslf = LabelFrame(mainframe, text='Símbolos', width=100)
+        symbolslf.grid(column=1, row=0, rowspan=2, sticky=(N, W, E, S))
+        
+        self.symbols = Text(symbolslf, width=20)
+        self.symbols.grid(column=0, row=0, sticky=(N, W, E, S))
+        self.msgarea.rowconfigure(0, weight=1)
+        self.msgarea.columnconfigure(0, weight=1)
 
         root.mainloop()
         
