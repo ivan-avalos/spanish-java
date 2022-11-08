@@ -1,6 +1,11 @@
 from enum import Enum
 from symbol import LexToken, TablaLex, tokens
 
+op_compuestos = ['>=', '<=', '==', '!=', '&&', '||', '++', '--']
+op_simples_a = ['=', '+', '-', '&', '|']
+op_simples_b = ['!', '<', '>']
+op_simples = op_simples_a + op_simples_b
+
 def inicio_lexer(data):
     tabla = TablaLex()
     
@@ -12,7 +17,8 @@ def inicio_lexer(data):
     recol_ident = ''
     
     for c in data + "\n":
-        # print (c + ' (' + selector + ')')
+        if c != "\t" and c != "\n":
+            print (c + ' (' + selector + ')')
         
         if selector == '':
             # Entradas a tokens
@@ -26,10 +32,10 @@ def inicio_lexer(data):
                 selector = 'ID/RESERVADA'
             elif c == '/':
                 recol_comentario = '/'
-            elif (c == '=' or c == '+' or c == '-' or c == '&' or c == '|') and recol_operador == '':
+            elif c in op_simples_a and recol_operador == '':
                 recol_operador = c
                 continue
-            elif c == '!' or c == '<' or c == '>':
+            elif c in op_simples_b:
                 recol_operador = c
                 continue
             elif (c == '{' or c == '}' or c == '(' or c == ')' or
@@ -46,8 +52,7 @@ def inicio_lexer(data):
             # Apertura de operador compuesto
             if len(recol_operador) > 0:
                 rc = recol_operador + c
-                if (rc == '>=' or rc == '<=' or rc == '==' or rc == '!=' or
-                    rc == '&&' or rc == '||' or rc == '++' or rc == '--'):
+                if rc in op_compuestos:
                     # Operador compuesto
                     tabla.insertar(LexToken(rc, None, None, 1))
                     recol_operador = ''
@@ -55,7 +60,10 @@ def inicio_lexer(data):
                 else:
                     # Operador simple
                     tabla.insertar(LexToken(recol_operador, None, None, 1))
+                    if c in op_simples:
+                        tabla.insertar(LexToken(c, None, None, 1))
                     recol_operador = ''
+                    continue
         
         # Cadenas de texto
         if selector == 'STRING_LIT':
