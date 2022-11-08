@@ -40,6 +40,7 @@ class Main:
         root.title ("Javañol")
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
+        root.option_add('*tearOff', FALSE)
 
         mainframe = ttk.Frame(root, padding="3 3 12 12")
         mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -48,9 +49,8 @@ class Main:
         mainframe.rowconfigure(1, weight=0)
 
         # Menú
-        win = Toplevel(root)
-    
-        menubar = Menu(win)
+        menubar = Menu(root)
+        root['menu'] = menubar
 
         menu_file = Menu(menubar)
         menubar.add_cascade(menu=menu_file, label='Archivo')
@@ -62,8 +62,6 @@ class Main:
         menubar.add_cascade(menu=menu_program, label='Programa')
         menu_program.add_command(label='Compilar', command=self.compilar_programa)
         menu_program.add_command(label='Ejecutar', command=self.ejecutar_programa)
-    
-        win['menu'] = menubar
 
         # Editor de código
         self.text = Text(mainframe)
