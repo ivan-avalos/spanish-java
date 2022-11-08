@@ -5,6 +5,21 @@ op_compuestos = ['>=', '<=', '==', '!=', '&&', '||', '++', '--']
 op_simples_a = ['=', '+', '-', '&', '|'] # pueden ir al final del op compuesto
 op_simples_b = ['!', '<', '>']           # solo pueden ir al inicio del op compuesto
 op_simples = op_simples_a + op_simples_b
+reservadas = {
+    'booleano': 'BOOLEAN',
+    'detener': 'BREAK',
+    'cadena': 'STRING',
+    'caracter': 'CHAR',
+    'sino': 'ELSE',
+    'porcada': 'FOR',
+    'si': 'IF',
+    'entero': 'INT',
+    'imprimir': 'PRINT',
+    'leer': 'READ',
+    'retorna': 'RETURN',
+    'vacio': 'VOID',
+    'mientras': 'WHILE'
+}
 
 class Selector(Enum):
     NINGUNO = 0
@@ -12,6 +27,7 @@ class Selector(Enum):
     CHAR_LIT = 2
     ID_RESERVADA = 3
     COMMENT = 4
+    ENTERO = 5
 
 class Control(Enum):
     SIGUIENTE = 0
@@ -20,21 +36,24 @@ class Control(Enum):
 
 class Lexer:
     tabla = TablaLex()
+    numlinea = 1
     selector = Selector.NINGUNO
     recol_string = ''
     recol_caracter = ''
     recol_comentario = ''
     recol_operador = ''
     recol_ident = ''
+    recol_entero = ''
 
     def inicio_lexer(self, data):
-        for c in data + "\n":
-            r = self.procesar(c)
-            if r == 2: return
-            while r != Control.SIGUIENTE:
-                print ('r = ' + str(r))
+        for l in data.splitlines():
+            for c in l + "\n":
                 r = self.procesar(c)
-                if r == Control.ERROR: return
+                if r == 2: return
+                while r != Control.SIGUIENTE:
+                    r = self.procesar(c)
+                    if r == Control.ERROR: return
+            self.numlinea += 1
 
         # Imprimir tabla de símbolos
         print (str(self.tabla))
@@ -55,6 +74,9 @@ class Lexer:
             # Entrada a id o palabra reservada
             elif c.isalpha() or c == '_':
                 self.selector = Selector.ID_RESERVADA
+            # Entrada a entero
+            elif c.isdigit():
+                self.selector = Selector.ENTERO
             # Entrada a comentario
             elif c == '/':
                 self.recol_comentario = '/'
@@ -69,7 +91,7 @@ class Lexer:
             # Entrada a tokens simples
             elif (c == '{' or c == '}' or c == '(' or c == ')' or
                   c == ',' or c == '.' or c == ';' or (c == '*' and self.recol_comentario == '')):
-                self.tabla.insertar(LexToken(c, None, None, 1))
+                self.insertar_tabla(c, None, None)
                 return Control.SIGUIENTE
 
             # Apertura de comentario
@@ -83,14 +105,14 @@ class Lexer:
                 rc = self.recol_operador + c
                 if rc in op_compuestos:
                     # Operador compuesto
-                    self.tabla.insertar(LexToken(rc, None, None, 1))
+                    self.insertar_tabla(rc, None, None)
                     self.recol_operador = ''
                     return Control.SIGUIENTE
                 else:
                     # Operador simple
-                    self.tabla.insertar(LexToken(self.recol_operador, None, None, 1))
+                    self.insertar_tabla(self.recol_operador, None, None)
                     if c in op_simples:
-                        self.tabla.insertar(LexToken(c, None, None, 1))
+                        self.insertar_tabla(c, None, None)
                     self.recol_operador = ''
                     return Control.SIGUIENTE
 
@@ -110,11 +132,15 @@ class Lexer:
         if self.selector == Selector.ID_RESERVADA:
             return self.procesar_identificador(c)
 
+        # Enteros
+        if self.selector == Selector.ENTERO:
+            return self.procesar_entero(c)
+
         return Control.SIGUIENTE
 
     def procesar_cadena(self, c):
         if c == '"':
-            self.tabla.insertar(LexToken('STRING_LIT', None, self.recol_string, 1))
+            self.insertar_tabla('STRING_LIT', None, self.recol_string)
             self.selector = Selector.NINGUNO
             self.recol_string = ''
         else:
@@ -129,7 +155,7 @@ class Lexer:
             if len(self.recol_caracter) == 0:
                 print ('Error: literal de caracter vacía')
                 return Control.ERROR
-            self.tabla.insertar(LexToken('CHAR_LIT', None, self.recol_caracter, 1))
+            self.insertar_tabla('CHAR_LIT', None, self.recol_caracter)
             self.selector = Selector.NINGUNO
             self.recol_caracter = ''
         else:
@@ -151,41 +177,28 @@ class Lexer:
         if c.isalnum() or c == '_':
             self.recol_ident += c
         else:
-            if self.recol_ident == 'booleano':
-                self.tabla.insertar(LexToken('BOOLEAN', None, None, 1))
-            elif self.recol_ident == 'detener':
-                self.tabla.insertar(LexToken('BREAK', None, None, 1))
-            elif self.recol_ident == 'byte':
-                self.tabla.insertar(LexToken('BYTE', None, None, 1))
-            elif self.recol_ident == 'caracter':
-                self.tabla.insertar(LexToken('CHAR', None, None, 1))
-            elif self.recol_ident == 'doble':
-                self.tabla.insertar(LexToken('DOUBLE', None, None, 1))
-            elif self.recol_ident == 'sino':
-                self.tabla.insertar(LexToken('ELSE', None, None, 1))
-            elif self.recol_ident == 'porcada':
-                self.tabla.insertar(LexToken('FOR', None, None, 1))
-            elif self.recol_ident == 'si':
-                self.tabla.insertar(LexToken('IF', None, None, 1))
-            elif self.recol_ident == 'entero':
-                self.tabla.insertar(LexToken('INT', None, None, 1))
-            elif self.recol_ident == 'imprimir':
-                self.tabla.insertar(LexToken('PRINT', None, None, 1))
-            elif self.recol_ident == 'leer':
-                self.tabla.insertar(LexToken('READ', None, None, 1))
-            elif self.recol_ident == 'retorna':
-                self.tabla.insertar(LexToken('RETURN', None, None, 1))
-            elif self.recol_ident == 'vacio':
-                self.tabla.insertar(LexToken('VOID', None, None, 1))
-            elif self.recol_ident == 'mientras':
-                self.tabla.insertar(LexToken('WHILE', None, None, 1))
+            if self.recol_ident in reservadas.keys():
+                self.insertar_tabla(reservadas[self.recol_ident], None, None)
             elif self.recol_ident == 'verdadero':
-                self.tabla.insertar(LexToken('BOOLEAN_LIT', None, True, 1))
+                self.insertar_tabla('BOOLEAN_LIT', None, True)
             elif self.recol_ident == 'falso':
-                self.tabla.insertar(LexToken('BOOLEAN_LIT', None, False, 1))
+                self.insertar_tabla('BOOLEAN_LIT', None, False)
             else:
-                self.tabla.insertar(LexToken('IDENT', self.recol_ident, None, 1))
+                self.insertar_tabla('IDENT', self.recol_ident, None)
             self.recol_ident = ''
             self.selector = Selector.NINGUNO
             return Control.REPETIR
         return Control.SIGUIENTE
+
+    def procesar_entero(self, c):
+        if c.isdigit():
+            self.recol_entero += c
+        else:
+            self.insertar_tabla('INT_LIT', None, int(self.recol_entero))
+            self.recol_entero = ''
+            self.selector = Selector.NINGUNO
+            return Control.REPETIR
+        return Control.SIGUIENTE
+
+    def insertar_tabla(self, token, nombre, valor):
+        self.tabla.insertar(LexToken(token, nombre, valor, self.numlinea))
