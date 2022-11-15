@@ -153,6 +153,6 @@ class App(Adw.Application):
         self.win = MainWindow(application=app)
         self.win.present()
 
-    
-app = App(application_id='mx.rgg.spanishjava')
-app.run(sys.argv)
+if __name__ == "__main__":
+    app = App(application_id='mx.rgg.spanishjava')
+    app.run(sys.argv)
