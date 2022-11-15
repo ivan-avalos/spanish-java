@@ -4,7 +4,7 @@ from arbol import Arbol, Nodo
 from shared import Control
 from pprint import pprint
 
-valores = ['IDENT', 'BOOLEAN_LIT', 'CHAR_LIT', 'INT_LIT']
+valores = ['IDENT', 'BOOLEAN_LIT', 'CHAR_LIT', 'INT_LIT', 'STRING_LIT']
 
 operadores = [
     '>=', '<=', '==', '!=', '&&', '||', '++', '--',
@@ -45,7 +45,7 @@ class Parser:
         if len(self.pila_selector) == 0:
             return Control.SIGUIENTE
             
-        # pprint (self.pila_selector[-1])
+        pprint (self.pila_selector[-1])
         
         cima = self.pila_selector[-1]
         
@@ -124,6 +124,7 @@ class Parser:
                     'nombre': recol[1].nombre
                 }))
                 self.pila_selector.pop()
+                self.pila_selector.append([Selector.NINGUNO, []])
             elif t.tipo == '=':
                 recol.append(t)
             else:
@@ -160,7 +161,33 @@ class Parser:
         return Control.SIGUIENTE
 
     def procesar_directiva(self, t):
-        return
+        recol = self.pila_selector[-1][1]
+        
+        # directiva
+        if len(recol) == 1:
+            if t.tipo in valores:
+                self.pila_selector.append([Selector.EXPRESION, [t]])
+                recol.append(t)
+            else:
+                print('Error: se esperaba una expresión')
+                return Control.ERROR
+            return Control.SIGUIENTE
+
+        # directiva + expr
+        if len(recol) == 2:
+            if t.tipo == ';':
+                self.pila_arbol[-1].hijos.append(Nodo({
+                    'selector': Selector.DIRECTIVA,
+                    'expresion': self.expresion
+                }))
+                self.expresion = None
+                self.pila_selector.pop()
+                self.pila_selector.append([Selector.NINGUNO, []])
+            else:
+                print('Error: se esperaba `;`')
+                return Control.ERROR
+
+        return Control.SIGUIENTE
 
     def procesar_expresion(self, t):
         recol = self.pila_selector[-1][1]
@@ -172,19 +199,19 @@ class Parser:
             else:
                 print('Error: se esperaba un identificador o una literal')
                 return Control.ERROR
-
-        if tipo_ultimo in valores and t in operadores:
+            
+        if tipo_ultimo in valores and t.tipo in operadores:
             recol.append(t)  
-        elif tipo_ultimo in operadores and t in valores:
+        elif tipo_ultimo in operadores and t.tipo in valores:
             recol.append(t)
-        elif tipo_ultimo in valores and t in valores:
+        elif tipo_ultimo in valores and t.tipo in valores:
             print('Error: se esperaba un operador')
             return Control.ERROR
-        elif tipo_ultimo in operadores and t in operadores:
+        elif tipo_ultimo in operadores and t.tipo in operadores:
             print('Error: se esperaba un identificador o una literal')
             return Control.ERROR
         else:
-            self.expresion = recol
+            self.expresion = recol[1:]
             self.pila_selector.pop()
             return Control.REPETIR
 
