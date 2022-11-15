@@ -1,43 +1,43 @@
-class automata_cadena:
-        int stateN = 0
-        int isAccepted(char str[]):
+class automata_cad:
+    stateN = 0
 
-            int len = len(str)
-            
-            for i in len:
-                if (stateN == 0):
-                    start(str[i])
-                else: 
-                    if (stateN == 1):
-                        state1(str[i])
-                    else: 
-                        if (stateN == 2):
-                            state2(str[i])   
-                        else:
-                            return 0
+    def isAccepted(self, _str):
+        i = len(_str)
+        _len = len(_str)
 
-            if (stateN == 2):
-                return 1
+        for i in range(len):
+            if self.stateN == 0:
+                self.start(_str[i])
+            if self.stateN == 1:
+                self.state1(_str[i])
+            if self.stateN == 2:
+                self.state2(str[i])    
             else:
                 return 0
-            
-            def start(char c):
-                if (c == '\"'):
-                    stateN = 1
-                else:
-                    stateN = -1
-                
-            def state1(char c):
-                if (c != '\"'):
-                    stateN = 1
-                else:
-                    stateN = 2
-            
-            def state2(char c):
-                stateN = -1
-            
-            bool verified(char* token):
-                if (isAccepted(token)):
-                    return true
-                else:
-                    return false
+        if self.stateN == 2
+            return 1
+        else:
+            return 0
+    
+    def start(self, c):
+        if (c == '\"'):
+            self.stateN = 1
+        else:
+            self.stateN = -1
+        
+    def state1(self,c):
+        if (c != '\"'):
+            self.stateN = 1
+        else:
+            self.stateN = 2
+    
+    def state2(self,c):
+        self.stateN = -1
+    
+    def verified(self,token)
+    {
+        if isAccepted(token):
+            return true
+        else:
+            return false
+    }

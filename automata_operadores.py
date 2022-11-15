@@ -1,109 +1,96 @@
-class automata_operador:
-    int stateN = 0
-    int isAccepted(char str[]):
 
-        int len = len(str)
+class automata_ope:
+    stateN = 0
+
+    def isAccepted(self, _str):
+        i = len(_str)
+        _len = len(_str)
         
-        for i in len:
-            if (stateN == 0):
-                start(str[i])
-            else: 
-                if (stateN == 1):
-                    state1(str[i])
-                else: 
-                    if (stateN == 2):
-                        state2(str[i])
-                    else: 
-                        if (stateN == 3):
-                            state3(str[i])
-                        else: 
-                            if (stateN == 4):
-                                state4(str[i])
-                            else: 
-                                if (stateN == 5):
-                                    state5(str[i])
-                                else: 
-                                    if (stateN == 6):
-                                        state6(str[i])
-                                    else: 
-                                        if (stateN == 7):
-                                            state7(str[i])
-                                        else: 
-                                            if (stateN == 8):
-                                                state8(str[i])
-                                            else:
-                                                return 0
-
-        if (stateN == 1 or stateN == 7 or stateN == 8 or stateN == 2 or stateN == 3 or stateN == 6):
+        for i in range(len):
+            if self.stateN == 0:
+                self.start(_str[i])
+            if self.stateN == 1:
+                self.state1(_str[i])
+            if self.stateN == 2:
+                self.state2(_str[i])
+            if self.stateN == 3:
+                self.state3(_str[i])
+            if self.stateN == 4:
+                self.start4(_str[i])
+            if self.stateN == 5:
+                self.state5(_str[i])
+            if self.stateN == 6:
+                self.state6(_str[i])
+            if self.stateN == 7:
+                self.state7(_str[i])
+            if self.stateN == 8:
+                self.state8(_str[i])
+            else:
+                return 0
+        if (self.stateN == 1 or self.stateN == 7 or self.stateN == 8 or self.stateN == 2 or self.stateN == 3 or self.stateN == 6):
             return 1
         else:
             return 0
     
-    def start(char c):
+    def start(self,c):
         if(c == '=' or c == '>' or c == '<' or c == '/' or c == '*' or c == '%' or c == '!'):
-            stateN = 1
-        else: 
-            if(c == '&'):
-                stateN = 4
-            else: 
-                if(c == '|'):
-                    stateN = 5
-                else: 
-                    if(c == '-'):
-                        stateN = 6
-                    else: 
-                        if(c == '+'):
-                            stateN = 3
-                        else
-                            stateN = -1
+            self.stateN = 1
+        else if(c == '&'):
+            self.stateN = 4
+        else if(c == '|'):
+            self.stateN = 5
+        else if(c == '-'):
+            selfstateN = 6
+        else if(c == '+'):
+            selfstateN = 3
+        else:
+            self.stateN = -1
         
-    def state1(char c):
+    def state1(self,c):
         if(c == '='):
-            stateN = 2
+            self.stateN = 2
         else:
-            stateN = -1
+            self.stateN = -1
+
+    def state2(self,c):
+        self.stateN = -1
     
-    def state2(char c):
-        stateN = -1
-    
-    def state3(char c):
+    def state3(self,c):
         if(c == '+'):
-            stateN = 7
-        else: 
-            if(c == '=')
-                stateN = 2
-            else:
-                stateN = -1
+            self.stateN = 7
+        else if(c == '='):
+            self.stateN = 2
+        else:
+            self.stateN = -1
     
-    def state4(char c):
+    def state4(self,c):
         if(c == '&'):
-            stateN = 2
+            self.stateN = 2
         else:
-            stateN = -1
+            self.stateN = -1
     
-    def state5(char c):
+    def state5(self,c):
         if(c == '|'):
-            stateN = 2
+            self.stateN = 2
         else:
-            stateN = -1
+            self.stateN = -1
     
-    def state6(char c):
+    def state6(self,c):
         if(c == '-'):
-            stateN = 8
-        else: 
-            if(c == '=')
-                stateN = 2
-            else
-            stateN = -1
+            self.stateN = 8
+        else if(c == '='):
+            self.stateN = 2
+        else:
+            self.stateN = -1
     
-    def state7(char c):
-        stateN = -1
+    def state7(self,c):
+        self.stateN = -1
     
-    def state8(char c):
-        stateN = -1
+    def state8(self,c):
+        self.stateN = -1
     
-    bool verified(char* token):
-        if (isAccepted(token)):
+    def verified(self,token):
+        if isAccepted(token):
             return true
         else:
             return false

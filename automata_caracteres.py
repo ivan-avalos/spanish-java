@@ -1,52 +1,51 @@
-class automata_caracter:
-        int stateN = 0
-        int isAccepted(char str[]):
+class automata_car:
+    stateN = 0
 
-            int len = len(str)
-            
-            for i in len:
-                if (stateN == 0):
-                    start(str[i])
-                else: 
-                    if (stateN == 1):
-                        state1(str[i])
-                    else:
-                        if (stateN == 2):
-                            state2(str[i]) 
-                        else:
-                            if (stateN == 3):
-                                state3(str[i])
-                            else:
-                                return 0
 
-            if (stateN == 3):
-                return 1
+    def isAccepted(self, _str):
+        i = len(_str)
+        _len = len(_str)
+        
+        for i in range(len):
+            if self.stateN == 0:
+                self.start(_str[i])
+            if self.stateN == 1:
+                self.state1(_str[i])
+            if self.stateN == 2:
+                self.state2(_str[i])
+            if self.stateN == 3:
+                self.state3(_str[i])
             else:
                 return 0
-			
-			def start(char c):
-			    if (c == '\''):
-			        stateN = 1
-			    else:
-			        stateN = -1
-
-			def state1(char c):
-			    if (c != '\''):
-                    stateN = 2
-			    else:
-			    	stateN = 3
-			
-			def state2(char c):
-			    if (c == '\''):
-			        stateN = 3
-			    else:
-                    stateN = -1
-			
-			def state3(char c):
-			    stateN = -1
-			
-			bool verified(char* token):
-			    if (isAccepted(token)):
-			        return true
-			    else:
-			        return false
+        if self.stateN == 3:
+            return 1
+        else:
+            return 0
+    
+    def start(self,c):
+        if (c == '\''):
+            self.stateN = 1
+        else:
+            self.stateN = -1
+        
+    def state1(self,c):
+        if (c != '\''):
+            self.stateN = 2
+        else:
+            self.stateN = 3
+    
+    def state2(self,c):
+        if (c == '\''):
+            self.stateN = 3
+        else:
+            self.stateN = -1
+    
+    def state3(self,c):
+        self.stateN = -1
+    
+    def verified(self,token){
+        if isAccepted(token):
+            return true
+        else:
+            return false
+    }
