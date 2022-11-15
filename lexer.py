@@ -1,10 +1,13 @@
 from enum import Enum
-from symbol import LexToken, TablaLex, tokens
+from tabla import LexToken, TablaLex, tokens
+from parser import Parser
+from shared import Control
 
 op_compuestos = ['>=', '<=', '==', '!=', '&&', '||', '++', '--']
 op_simples_a = ['=', '+', '-', '&', '|'] # pueden ir al final del op compuesto
 op_simples_b = ['!', '<', '>']           # solo pueden ir al inicio del op compuesto
 op_simples = op_simples_a + op_simples_b
+otros_tokens = ['{', '}', '(', ')', ',', '.', ';']
 reservadas = {
     'booleano': 'BOOLEAN',
     'detener': 'BREAK',
@@ -29,24 +32,21 @@ class Selector(Enum):
     COMMENT = 4
     ENTERO = 5
 
-class Control(Enum):
-    SIGUIENTE = 0
-    REPETIR = 1
-    ERROR = 2
-
 class Lexer:
-    tabla = TablaLex()
-    numlinea = 1
-    selector = Selector.NINGUNO
-    recol_string = ''
-    recol_caracter = ''
-    recol_comentario = ''
-    recol_operador = ''
-    recol_ident = ''
-    recol_entero = ''
+    def __init__(self, data):
+        self.tabla = TablaLex()
+        self.numlinea = 1
+        self.selector = Selector.NINGUNO
+        self.recol_string = ''
+        self.recol_caracter = ''
+        self.recol_comentario = ''
+        self.recol_operador = ''
+        self.recol_ident = ''
+        self.recol_entero = ''
+        self.data = data
 
-    def inicio_lexer(self, data):
-        for l in data.splitlines():
+    def inicio(self):
+        for l in self.data.splitlines():
             for c in l + "\n":
                 r = self.procesar(c)
                 if r == 2: return
@@ -57,10 +57,12 @@ class Lexer:
 
         # Imprimir tabla de símbolos
         print (str(self.tabla))
+        Parser(self.tabla).inicio()
+        
 
     def procesar(self, c):
-        if c != "\t" and c != "\n":
-            print (c + ' (' + str(self.selector) + ')')
+        # if c != "\t" and c != "\n":
+        #    print (c + ' (' + str(self.selector) + ')')
 
         if self.selector == Selector.NINGUNO:
             # Entrada a string
@@ -89,8 +91,7 @@ class Lexer:
                 self.recol_operador = c
                 return Control.SIGUIENTE
             # Entrada a tokens simples
-            elif (c == '{' or c == '}' or c == '(' or c == ')' or
-                  c == ',' or c == '.' or c == ';' or (c == '*' and self.recol_comentario == '')):
+            elif c in otros_tokens or (c == '*' and self.recol_comentario == ''):
                 self.insertar_tabla(c, None, None)
                 return Control.SIGUIENTE
 

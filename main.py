@@ -27,7 +27,7 @@ class Main:
     def compilar_programa(self):
         self.output_file = filedialog.asksaveasfilename()
         data = self.text.get('1.0', 'end-1c')
-        Lexer().inicio_lexer(data)
+        Lexer(data).inicio()
 
     def ejecutar_programa(self):
         print('ejecutar_programa()')
