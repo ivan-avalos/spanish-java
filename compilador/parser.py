@@ -3,6 +3,7 @@ from tabla import LexToken, TablaLex, tokens
 from arbol import Arbol, Nodo
 from shared import Control
 from pprint import pprint
+from errors import Error
 
 valores = ['IDENT', 'BOOLEAN_LIT', 'CHAR_LIT', 'INT_LIT', 'STRING_LIT']
 
@@ -34,10 +35,10 @@ class Parser:
     def inicio (self):
         for t in self.tabla.tabla:
             r = self.procesar(t)
-            if r == 2: return
+            if r == Control.ERROR: exit(1)
             while r != Control.SIGUIENTE:
                 r = self.procesar(t)
-                if r == Control.ERROR: return
+                if r == Control.ERROR: exit(1)
 
         print(str(self.arbol))
 
@@ -110,7 +111,7 @@ class Parser:
         # tipo
         if len(recol) == 1:
             if t.tipo != 'IDENT':
-                print('Error: se esperaba identificador')
+                Error('S_ESPERA_IDENT', t.numlinea)
                 return Control.ERROR
             recol.append(t)
             return Control.SIGUIENTE
@@ -128,7 +129,7 @@ class Parser:
             elif t.tipo == '=':
                 recol.append(t)
             else:
-                print('Error: se esperaba `;` o `=`')
+                Error('S_ESPERA_PC_O_IGUAL', t.numlinea)
                 return Control.ERROR
             return Control.SIGUIENTE
 
@@ -138,7 +139,7 @@ class Parser:
                 self.pila_selector.append([Selector.EXPRESION, [t]])
                 recol.append(t)
             else:
-                print('Error: se esperaba una expresión')
+                Error('S_ESPERA_EXPR', t.numlinea)
                 return Control.ERROR
             return Control.SIGUIENTE
 
@@ -155,7 +156,7 @@ class Parser:
                 self.pila_selector.pop()
                 self.pila_selector.append([Selector.NINGUNO, []])
             else:
-                print('Error: se esperaba `;`')
+                Error('S_ESPERA_PC', t.numlinea)
                 return Control.ERROR
 
         return Control.SIGUIENTE
@@ -169,7 +170,7 @@ class Parser:
                 self.pila_selector.append([Selector.EXPRESION, [t]])
                 recol.append(t)
             else:
-                print('Error: se esperaba una expresión')
+                Error('S_ESPERA_EXPR', t.numlinea)
                 return Control.ERROR
             return Control.SIGUIENTE
 
@@ -184,7 +185,7 @@ class Parser:
                 self.pila_selector.pop()
                 self.pila_selector.append([Selector.NINGUNO, []])
             else:
-                print('Error: se esperaba `;`')
+                Error('S_ESPERA_EXPR', t.numlinea)
                 return Control.ERROR
 
         return Control.SIGUIENTE
@@ -197,7 +198,7 @@ class Parser:
             if tipo_ultimo in valores:
                 recol.append(recol[-1])
             else:
-                print('Error: se esperaba un identificador o una literal')
+                Error('S_ESPERA_IDENT_O_LIT', t.numlinea)
                 return Control.ERROR
             
         if tipo_ultimo in valores and t.tipo in operadores:
@@ -205,10 +206,10 @@ class Parser:
         elif tipo_ultimo in operadores and t.tipo in valores:
             recol.append(t)
         elif tipo_ultimo in valores and t.tipo in valores:
-            print('Error: se esperaba un operador')
+            Error('S_ESPERA_OPER', t.numlinea)
             return Control.ERROR
         elif tipo_ultimo in operadores and t.tipo in operadores:
-            print('Error: se esperaba un identificador o una literal')
+            Error('S_ESPERA_IDENT_O_LIT', t.numlinea)
             return Control.ERROR
         else:
             self.expresion = recol[1:]

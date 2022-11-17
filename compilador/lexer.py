@@ -2,6 +2,7 @@ from enum import Enum
 from tabla import LexToken, TablaLex, tokens
 from parser import Parser
 from shared import Control
+from errors import Error
 
 op_compuestos = ['>=', '<=', '==', '!=', '&&', '||', '++', '--']
 op_simples_a = ['=', '+', '-', '&', '|'] # pueden ir al final del op compuesto
@@ -52,10 +53,10 @@ class Lexer:
         for l in self.data.splitlines():
             for c in l + "\n":
                 r = self.procesar(c)
-                if r == 2: return
+                if r == Control.ERROR: exit(1)
                 while r != Control.SIGUIENTE:
                     r = self.procesar(c)
-                    if r == Control.ERROR: return
+                    if r == Control.ERROR: exit(1)
             self.numlinea += 1
 
         # Imprimir tabla de símbolos
@@ -154,11 +155,11 @@ class Lexer:
 
     def procesar_caracter(self, c):
         if len(self.recol_caracter) > 1:
-            print ('Error: más de un caracter en una literal de caracter')
+            Error('L_CAR_LARGO', self.numlinea)
             return Control.ERROR
         if c == '\'':
             if len(self.recol_caracter) == 0:
-                print ('Error: literal de caracter vacía')
+                Error('L_CAR_VACIO', self.numlinea)
                 return Control.ERROR
             self.insertar_tabla('CHAR_LIT', None, self.recol_caracter)
             self.selector = Selector.NINGUNO

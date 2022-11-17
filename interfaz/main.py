@@ -94,7 +94,6 @@ class MainWindow(Gtk.ApplicationWindow):
         notebook.append_page(scrolled, Gtk.Label.new('Símbolos'))
 
     def abrir_archivo(self, button):
-        print('abrir_archivo()')
         self.open_dialog = Gtk.FileChooserNative.new(
             title='Abrir archivo',
             parent=self,
@@ -122,25 +121,29 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def correr(self, button):
         self.guardar_archivo(None)
+        self.limpiar_tabla()
         if self.input_file:
             result = subprocess.run([
                 'python', compilador_dir,
                 '-i', self.input_file,
                 '-o', self.output_file,
                 '-t'
-            ], stdout=subprocess.PIPE)
+            ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             output = result.stdout.decode('utf-8')
             self.msgbuf.set_text(output)
 
-            # Tabla de símbolos
-            with open(self.input_file + '.tab', 'r') as f:
-                data = f.read()
-                self.llenar_tabla(data)
+            if result.returncode == 0:
+                # Tabla de símbolos
+                with open(self.input_file + '.tab', 'r') as f:
+                    data = f.read()
+                    self.llenar_tabla(data)
+
+    def limpiar_tabla(self):
+        for i in range(4):
+            self.tablagrid.remove_column(0)
 
     def llenar_tabla(self, data):
         tabla = json.loads(data)
-        for i in range(4):
-            self.tablagrid.remove_column(0)
         label_linea = Gtk.Label.new(None)
         label_linea.set_markup('<b>Línea</b>')
         label_nombre = Gtk.Label.new(None)
