@@ -1,3 +1,4 @@
+import json, os
 from enum import Enum
 from dataclasses import dataclass
 from typing import Any
@@ -62,6 +63,22 @@ class TablaLex:
             if t.nombre == nombre:
                 self.tabla[i] = tok
                 return
+
+    def exportar(self, output_file):
+        data = []
+        for t in self.tabla:
+            data.append({
+                'tipo': t.tipo,
+                'nombre': t.nombre,
+                'valor': str(t.valor),
+                'numlinea': t.numlinea
+            })
+        output = json.dumps(data)
+        if os.path.exists(output_file):
+            os.remove(output_file)
+        with open(output_file, 'w+') as f:
+            f.truncate(0)
+            f.write(output)
 
     def __str__(self):
         output = ""

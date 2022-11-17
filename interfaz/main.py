@@ -1,4 +1,4 @@
-import gi, sys, subprocess
+import gi, sys, subprocess, json
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 gi.require_version('GtkSource', '5')
@@ -22,7 +22,8 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.crear_headerbar()
         self.crear_textview()
-        self.crear_paneles()
+        self.crear_area_mensajes()
+        self.crear_tabla_simbolos()
 
     def crear_headerbar(self):
         header = Gtk.HeaderBar()
@@ -42,8 +43,6 @@ class MainWindow(Gtk.ApplicationWindow):
         self.run_button.set_icon_name('media-playback-start-symbolic')
         self.run_button.connect('clicked', self.correr)
         header.pack_end(self.run_button)
-        
-        return
 
     def crear_textview(self):
         scrolled_win = Gtk.ScrolledWindow()
@@ -61,34 +60,38 @@ class MainWindow(Gtk.ApplicationWindow):
         
         scrolled_win.set_child(self.sourceview)
 
-    def crear_paneles(self):
-        # Área de mensajes
-        notebook1 = Gtk.Notebook()
-        self.grid.attach(notebook1, 0, 1, 2, 1)
+    def crear_area_mensajes(self):
+        notebook = Gtk.Notebook()
+        self.grid.attach(notebook, 0, 1, 2, 1)
 
-        scrolled_msg = Gtk.ScrolledWindow()
-        scrolled_msg.set_hexpand(True)
-        scrolled_msg.set_min_content_height(150)
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_hexpand(True)
+        scrolled.set_min_content_height(150)
         
         self.msgbuf = GtkSource.Buffer()
         self.msgview = GtkSource.View.new_with_buffer(self.msgbuf)
         self.msgview.set_editable(False)
-        scrolled_msg.set_child(self.msgview)
-        notebook1.append_page(scrolled_msg, Gtk.Label.new('Mensajes'))
+        scrolled.set_child(self.msgview)
+        notebook.append_page(scrolled, Gtk.Label.new('Mensajes'))
 
-        # Tabla de símbolos
-        notebook2 = Gtk.Notebook()
-        self.grid.attach(notebook2, 1, 0, 1, 1)
+    def crear_tabla_simbolos(self):
+        notebook = Gtk.Notebook()
+        self.grid.attach(notebook, 1, 0, 1, 1)
 
-        scrolled_tabla = Gtk.ScrolledWindow()
-        scrolled_tabla.set_vexpand(True)
-        scrolled_tabla.set_min_content_width(300)
-        
-        self.tablabuf = GtkSource.Buffer()
-        self.tablaview = GtkSource.View.new_with_buffer(self.tablabuf)
-        self.tablaview.set_editable(False)
-        scrolled_tabla.set_child(self.tablaview)
-        notebook2.append_page(scrolled_tabla, Gtk.Label.new('Símbolos'))
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_vexpand(True)
+        scrolled.set_min_content_width(300)
+
+        self.tablagrid = Gtk.Grid()
+        self.tablagrid.set_vexpand(True)
+        self.tablagrid.set_row_spacing(8)
+        self.tablagrid.set_column_spacing(8)
+        self.tablagrid.set_margin_top(8)
+        self.tablagrid.set_margin_start(8)
+        self.tablagrid.set_margin_end(8)
+        self.tablagrid.set_margin_bottom (8)
+        scrolled.set_child(self.tablagrid)
+        notebook.append_page(scrolled, Gtk.Label.new('Símbolos'))
 
     def abrir_archivo(self, button):
         print('abrir_archivo()')
@@ -123,10 +126,40 @@ class MainWindow(Gtk.ApplicationWindow):
             result = subprocess.run([
                 'python', compilador_dir,
                 '-i', self.input_file,
-                '-o', self.output_file
+                '-o', self.output_file,
+                '-t'
             ], stdout=subprocess.PIPE)
             output = result.stdout.decode('utf-8')
             self.msgbuf.set_text(output)
+
+            # Tabla de símbolos
+            with open(self.input_file + '.tab', 'r') as f:
+                data = f.read()
+                self.llenar_tabla(data)
+
+    def llenar_tabla(self, data):
+        tabla = json.loads(data)
+        for i in range(4):
+            self.tablagrid.remove_column(0)
+        label_linea = Gtk.Label.new(None)
+        label_linea.set_markup('<b>Línea</b>')
+        label_nombre = Gtk.Label.new(None)
+        label_nombre.set_markup('<b>Nombre</b>')
+        label_valor = Gtk.Label.new(None)
+        label_valor.set_markup('<b>Valor</b>')
+        label_tipo = Gtk.Label.new(None)
+        label_tipo.set_markup('<b>Tipo</b>')
+        self.tablagrid.attach(label_linea, 0, 0, 1, 1)
+        self.tablagrid.attach(label_tipo, 1, 0, 1, 1)
+        self.tablagrid.attach(label_nombre, 2, 0, 1, 1)
+        self.tablagrid.attach(label_valor, 3, 0, 1, 1)
+        for i, t in enumerate(tabla):
+            row = i + 1
+            self.tablagrid.attach(Gtk.Label.new(str(t['numlinea'])), 0, row, 1, 1)
+            self.tablagrid.attach(Gtk.Label.new(t['tipo']), 1, row, 1, 1)
+            self.tablagrid.attach(Gtk.Label.new(t['nombre']), 2, row, 1, 1)
+            self.tablagrid.attach(Gtk.Label.new(str(t['valor'])), 3, row, 1, 1)
+            
 
 def on_activate(app):
     win = MainWindow()
