@@ -23,24 +23,26 @@ class Selector(Enum):
     FUNCION = 7
 
 class Parser:
-    def __init__(self, tabla):
+    def __init__(self, input_file: str):
         self.arbol = Arbol()
         self.pila_selector = [
             [Selector.NINGUNO, []] # selector, recolector
         ]
         self.pila_arbol = [self.arbol.raiz]
         self.expresion = None
-        self.tabla = tabla
+        self.tabla = TablaLex()
+        self.tabla.importar(input_file + '.tab')
     
     def inicio (self):
         for t in self.tabla.tabla:
             r = self.procesar(t)
-            if r == Control.ERROR: exit(1)
+            if r == Control.ERROR: return 1
             while r != Control.SIGUIENTE:
                 r = self.procesar(t)
-                if r == Control.ERROR: exit(1)
+                if r == Control.ERROR: return 1
 
         print(str(self.arbol))
+        return 0
 
     def procesar (self, t: LexToken):
         if len(self.pila_selector) == 0:

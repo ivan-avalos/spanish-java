@@ -34,7 +34,7 @@ class Selector(Enum):
     ENTERO = 5
 
 class Lexer:
-    def __init__(self, data, input_file):
+    def __init__(self, input_file: str):
         self.tabla = TablaLex()
         self.numlinea = 1
         self.selector = Selector.NINGUNO
@@ -44,26 +44,23 @@ class Lexer:
         self.recol_operador = ''
         self.recol_ident = ''
         self.recol_entero = ''
-        self.data = data
-        self.tabla_file = None
-        if input_file:
-            self.tabla_file = input_file + '.tab'
+        self.input_file = input_file
+        with open(input_file) as f:
+            self.data = f.read()
 
     def inicio(self):
         for l in self.data.splitlines():
             for c in l + "\n":
                 r = self.procesar(c)
-                if r == Control.ERROR: exit(1)
+                if r == Control.ERROR: return 1
                 while r != Control.SIGUIENTE:
                     r = self.procesar(c)
-                    if r == Control.ERROR: exit(1)
+                    if r == Control.ERROR: return 1
             self.numlinea += 1
 
-        # Imprimir tabla de símbolos
-        if self.tabla_file:
-            self.tabla.exportar(self.tabla_file)
-        Parser(self.tabla).inicio()
-        
+        # Exportar tabla de símbolos
+        self.tabla.exportar(self.input_file + '.tab')
+        return 0
 
     def procesar(self, c):
         # if c != "\t" and c != "\n":

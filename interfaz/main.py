@@ -24,9 +24,9 @@ class Semaforo(Gtk.DrawingArea):
         if color == self.Color.VERDE:
             self.set_draw_func(self.dibujar_sem_verde, None)
         elif color == self.Color.AMARILLO:
-            self.set_draw_func(self.dibujar_sem_rojo, None)
-        elif color == self.Color.ROJO:
             self.set_draw_func(self.dibujar_sem_amarillo, None)
+        elif color == self.Color.ROJO:
+            self.set_draw_func(self.dibujar_sem_rojo, None)
         else:
             self.set_draw_func(self.dibujar_sem_ninguno, None)
 
@@ -100,6 +100,7 @@ class MainWindow(Gtk.ApplicationWindow):
         
         self.save_button = Gtk.Button(label='Guardar')
         self.save_button.set_icon_name('document-save-symbolic')
+        self.save_button.set_sensitive(False)
         self.save_button.connect('clicked', self.guardar_archivo)
         header.pack_start(self.save_button)
 
@@ -140,6 +141,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.grid.attach(scrolled_win, 0, 0, 1, 1)
 
         self.sourcebuf = GtkSource.Buffer()
+        self.sourcebuf.connect('changed', self.edito_codigo)
         self.sourceview = GtkSource.View.new_with_buffer(self.sourcebuf)
         self.sourceview.set_show_line_numbers(True)
         self.sourceview.set_auto_indent(True)
@@ -227,14 +229,8 @@ class MainWindow(Gtk.ApplicationWindow):
         
         notebook.append_page(semgrid, Gtk.Label.new('Semáforo'))
 
-    def analisis_lexico(self, button):
-        print("analisis_lexico(...)")
-
-    def analisis_sintactico(self, button):
-        print("analisis_sintactico(...)")
-
-    def analisis_semantico(self, button):
-        print("analisis_semantico(...)")
+    def edito_codigo(self, buffer):
+        self.reset_semaforos()
 
     def abrir_archivo(self, button):
         self.open_dialog = Gtk.FileChooserNative.new(
@@ -252,8 +248,10 @@ class MainWindow(Gtk.ApplicationWindow):
             with open(self.input_file) as f:
                 data = f.read()
                 self.sourcebuf.set_text(data)
+                self.save_button.set_sensitive(True)
                 self.run_button.set_sensitive(True)
                 self.btn_lexico.set_sensitive(True)
+                self.sem_lexico.set_color(Semaforo.Color.AMARILLO)
 
     def guardar_archivo(self, button):
         if self.input_file:
@@ -284,30 +282,89 @@ Tecnológico Nacional de México en Celaya''')
         self.about_dialog.set_logo_icon_name('applications-development')
         self.about_dialog.show()
 
-    def correr(self, button):
+    def analisis_lexico(self, button):
         self.guardar_archivo(None)
         self.limpiar_tabla()
-        if self.input_file:
-            result = subprocess.run([
-                'python', compilador_dir,
-                '-i', self.input_file,
-                '-o', self.output_file,
-                '-t'
-            ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            output = result.stdout.decode('utf-8')
-            self.msgbuf.set_text(output)
+        self.reset_semaforos()
+        result = subprocess.run([
+            'python', compilador_dir,
+            '-i', self.input_file,
+            '-o', self.output_file,
+            '-l'
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = result.stdout.decode('utf-8')
+        self.msgbuf.set_text(output)
 
-            if result.returncode == 0:
-                # Tabla de símbolos
-                with open(self.input_file + '.tab', 'r') as f:
-                    data = f.read()
-                    self.llenar_tabla(data)
+        if result.returncode == 0:
+            self.sem_lexico.set_color(Semaforo.Color.VERDE)
+            self.sem_sintactico.set_color(Semaforo.Color.AMARILLO)
+            self.btn_sintactico.set_sensitive(True)
+            self.llenar_tabla()
+        else:
+            self.sem_lexico.set_color(Semaforo.Color.ROJO)
+
+    def analisis_sintactico(self, button):
+        self.limpiar_tabla()
+        self.sem_semantico.set_color(Semaforo.Color.NINGUNO)
+        self.btn_semantico.set_sensitive(False)
+        result = subprocess.run([
+            'python', compilador_dir,
+            '-i', self.input_file,
+            '-o', self.output_file,
+            '-p'
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = result.stdout.decode('utf-8')
+        self.msgbuf.set_text(output)
+
+        if result.returncode == 0:
+            self.sem_sintactico.set_color(Semaforo.Color.VERDE)
+            self.sem_semantico.set_color(Semaforo.Color.AMARILLO)
+            self.btn_semantico.set_sensitive(True)
+            self.llenar_tabla()
+        else:
+            self.sem_sintactico.set_color(Semaforo.Color.ROJO)
+            self.btn_sintactico.set_sensitive(False)
+
+    def analisis_semantico(self, button):
+        self.limpiar_tabla()
+        result = subprocess.run([
+            'python', compilador_dir,
+            '-i', self.input_file,
+            '-o', self.output_file,
+            '-s'
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = result.stdout.decode('utf-8')
+        self.msgbuf.set_text(output)
+
+        if result.returncode == 0:
+            self.sem_semantico.set_color(Semaforo.Color.VERDE)
+            self.llenar_tabla()
+        else:
+            self.sem_semantico.set_color(Semaforo.Color.ROJO)
+
+    def correr(self, button):
+        self.guardar_archivo(None)
+        self.reset_semaforos()
+        self.limpiar_tabla()
+        result = subprocess.run([
+            'python', compilador_dir,
+            '-i', self.input_file,
+            '-o', self.output_file,
+            '-t'
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = result.stdout.decode('utf-8')
+        self.msgbuf.set_text(output)
+
+        if result.returncode == 0:
+            self.llenar_tabla()
 
     def limpiar_tabla(self):
         for i in range(4):
             self.tablagrid.remove_column(0)
 
-    def llenar_tabla(self, data):
+    def llenar_tabla(self):
+        with open(self.input_file + '.tab', 'r') as f:
+            data = f.read()
         tabla = json.loads(data)
         label_linea = Gtk.Label.new(None)
         label_linea.set_markup('<b>Línea</b>')
@@ -327,7 +384,18 @@ Tecnológico Nacional de México en Celaya''')
             self.tablagrid.attach(Gtk.Label.new(t['tipo']), 1, row, 1, 1)
             self.tablagrid.attach(Gtk.Label.new(t['nombre']), 2, row, 1, 1)
             self.tablagrid.attach(Gtk.Label.new(str(t['valor'])), 3, row, 1, 1)
-            
+
+    def reset_semaforos(self):
+        if self.input_file:
+            self.sem_lexico.set_color(Semaforo.Color.AMARILLO)
+            self.btn_lexico.set_sensitive(True)
+        else:
+            self.sem_lexico.set_color(Semaforo.Color.NINGUNO)
+            self.btn_lexico.set_sensitive(False)
+        self.sem_sintactico.set_color(Semaforo.Color.NINGUNO)
+        self.btn_sintactico.set_sensitive(False)
+        self.sem_semantico.set_color(Semaforo.Color.NINGUNO)
+        self.btn_semantico.set_sensitive(False)
 
 def on_activate(app):
     win = MainWindow()

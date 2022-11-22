@@ -70,7 +70,7 @@ class TablaLex:
             data.append({
                 'tipo': t.tipo,
                 'nombre': t.nombre,
-                'valor': str(t.valor),
+                'valor': t.valor,
                 'numlinea': t.numlinea
             })
         output = json.dumps(data)
@@ -79,6 +79,15 @@ class TablaLex:
         with open(output_file, 'w+') as f:
             f.truncate(0)
             f.write(output)
+
+    def importar(self, input_file):
+        with open(input_file, 'r') as f:
+            data = json.loads(f.read())
+            for t in data:
+                self.insertar(LexToken(t['tipo'],
+                                       t['nombre'],
+                                       t['valor'],
+                                       t['numlinea']))
 
     def __str__(self):
         output = ""
