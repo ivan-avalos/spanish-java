@@ -1,10 +1,74 @@
-import gi, sys, subprocess, json
+from enum import Enum
+import gi, sys, os, subprocess, json, math, webbrowser
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 gi.require_version('GtkSource', '5')
-from gi.repository import Gtk, Gdk, Gio, Adw, GtkSource, Pango
+from gi.repository import Gtk, Gdk, Gio, GLib, Adw, GtkSource, Pango
 
 compilador_dir = '../compilador/main.py'
+
+class Semaforo(Gtk.DrawingArea):
+    class Color(Enum):
+        NINGUNO = 0
+        VERDE = 1
+        AMARILLO = 2
+        ROJO = 3
+    
+    def __init__(self, color: Color = Color.NINGUNO):
+        super().__init__()
+        self.set_content_width(120)
+        self.set_content_height(40)
+        self.set_color(color)
+
+    def set_color(self, color: Color):
+        if color == self.Color.VERDE:
+            self.set_draw_func(self.dibujar_sem_verde, None)
+        elif color == self.Color.AMARILLO:
+            self.set_draw_func(self.dibujar_sem_rojo, None)
+        elif color == self.Color.ROJO:
+            self.set_draw_func(self.dibujar_sem_amarillo, None)
+        else:
+            self.set_draw_func(self.dibujar_sem_ninguno, None)
+
+    def dibujar_sem_common(self, c, color: Color):        
+        # Verde
+        if color == self.Color.VERDE:
+            c.set_source_rgba(0, 1, 0, 1)
+        else:
+            c.set_source_rgba(0, 1, 0, 0.2)
+        c.set_line_width(16)
+        c.arc(20, 20, 8, 0, 2 * math.pi)
+        c.stroke()
+
+        # Amarillo
+        if color == self.Color.AMARILLO:
+            c.set_source_rgba(1, 1, 0, 1)
+        else:
+            c.set_source_rgba(1, 1, 0, 0.2)
+        c.set_line_width(16)
+        c.arc(60, 20, 8, 0, 2 * math.pi)
+        c.stroke()
+
+        # Rojo
+        if color == self.Color.ROJO:
+            c.set_source_rgba(1, 0, 0, 1)
+        else:
+            c.set_source_rgba(1, 0, 0, 0.2)
+        c.set_line_width(16)
+        c.arc(100, 20, 8, 0, 2 * math.pi)
+        c.stroke()
+
+    def dibujar_sem_verde(self, area, c, w, h, data):
+        self.dibujar_sem_common(c, self.Color.VERDE)
+
+    def dibujar_sem_amarillo(self, area, c, w, h, data):
+        self.dibujar_sem_common(c, self.Color.AMARILLO)
+
+    def dibujar_sem_rojo(self, area, c, w, h, data):
+        self.dibujar_sem_common(c, self.Color.ROJO)
+
+    def dibujar_sem_ninguno(self, area, c, w, h, data):
+        self.dibujar_sem_common(c, self.Color.NINGUNO)
 
 class MainWindow(Gtk.ApplicationWindow):
     input_file = None
@@ -23,7 +87,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.crear_headerbar()
         self.crear_textview()
         self.crear_area_mensajes()
-        self.crear_tabla_simbolos()
+        self.crear_panel_lateral()
 
     def crear_headerbar(self):
         header = Gtk.HeaderBar()
@@ -39,10 +103,35 @@ class MainWindow(Gtk.ApplicationWindow):
         self.save_button.connect('clicked', self.guardar_archivo)
         header.pack_start(self.save_button)
 
+        self.crear_menu(header)
+        
         self.run_button = Gtk.Button(label='Ejecutar')
         self.run_button.set_icon_name('media-playback-start-symbolic')
+        self.run_button.set_sensitive(False)
         self.run_button.connect('clicked', self.correr)
-        header.pack_end(self.run_button)
+        header.pack_end(self.run_button)        
+
+    def crear_menu(self, header):
+        action_help = Gio.SimpleAction.new('help', None)
+        action_help.connect('activate', self.mostrar_help)
+        self.add_action(action_help)
+        
+        action_about = Gio.SimpleAction.new('about', None)
+        action_about.connect('activate', self.mostrar_about)
+        self.add_action(action_about)
+
+        menu = Gio.Menu.new()
+        menu.append('Ayuda', 'win.help')
+        menu.append('Acerca de', 'win.about')
+
+        popover = Gtk.PopoverMenu()
+        popover.set_menu_model(menu)
+
+        hamburger = Gtk.MenuButton()
+        hamburger.set_popover(popover)
+        hamburger.set_icon_name('open-menu-symbolic')
+
+        header.pack_end(hamburger)        
 
     def crear_textview(self):
         scrolled_win = Gtk.ScrolledWindow()
@@ -74,10 +163,14 @@ class MainWindow(Gtk.ApplicationWindow):
         scrolled.set_child(self.msgview)
         notebook.append_page(scrolled, Gtk.Label.new('Mensajes'))
 
-    def crear_tabla_simbolos(self):
+    def crear_panel_lateral(self):
         notebook = Gtk.Notebook()
         self.grid.attach(notebook, 1, 0, 1, 1)
+        
+        self.crear_tabla_simbolos(notebook)
+        self.crear_semaforo(notebook)
 
+    def crear_tabla_simbolos(self, notebook):
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_vexpand(True)
         scrolled.set_min_content_width(300)
@@ -92,6 +185,56 @@ class MainWindow(Gtk.ApplicationWindow):
         self.tablagrid.set_margin_bottom (8)
         scrolled.set_child(self.tablagrid)
         notebook.append_page(scrolled, Gtk.Label.new('Símbolos'))
+
+    def crear_semaforo(self, notebook):
+        semgrid = Gtk.Grid()
+        semgrid.set_row_spacing(8)
+        semgrid.set_column_spacing(8)
+        semgrid.set_margin_top(8)
+        semgrid.set_margin_start(8)
+        semgrid.set_margin_end(8)
+        semgrid.set_margin_bottom (8)
+        
+        semgrid.attach(Gtk.Label.new('Léxico'), 0, 0, 1, 1)
+        semgrid.attach(Gtk.Label.new('Sintáctico'), 0, 1, 1, 1)
+        semgrid.attach(Gtk.Label.new('Semántico'), 0, 2, 1, 1)
+        
+        self.sem_lexico = Semaforo()
+        self.sem_sintactico = Semaforo()
+        self.sem_semantico = Semaforo()
+        semgrid.attach(self.sem_lexico, 1, 0, 1, 1)
+        semgrid.attach(self.sem_sintactico, 1, 1, 1, 1)
+        semgrid.attach(self.sem_semantico, 1, 2, 1, 1)
+
+        self.btn_lexico = Gtk.Button(label='Análisis léxico')
+        self.btn_lexico.set_icon_name('media-playback-start-symbolic')
+        self.btn_lexico.set_sensitive(False)
+        self.btn_lexico.connect('clicked', self.analisis_lexico)
+
+        self.btn_sintactico = Gtk.Button(label='Análisis sintáctico')
+        self.btn_sintactico.set_icon_name('media-playback-start-symbolic')
+        self.btn_sintactico.set_sensitive(False)
+        self.btn_sintactico.connect('clicked', self.analisis_sintactico)
+
+        self.btn_semantico = Gtk.Button(label='Análisis semántico')
+        self.btn_semantico.set_icon_name('media-playback-start-symbolic')
+        self.btn_semantico.set_sensitive(False)
+        self.btn_semantico.connect('clicked', self.analisis_semantico)
+
+        semgrid.attach(self.btn_lexico, 2, 0, 1, 1);
+        semgrid.attach(self.btn_sintactico, 2, 1, 1, 1);
+        semgrid.attach(self.btn_semantico, 2, 2, 1, 1);
+        
+        notebook.append_page(semgrid, Gtk.Label.new('Semáforo'))
+
+    def analisis_lexico(self, button):
+        print("analisis_lexico(...)")
+
+    def analisis_sintactico(self, button):
+        print("analisis_sintactico(...)")
+
+    def analisis_semantico(self, button):
+        print("analisis_semantico(...)")
 
     def abrir_archivo(self, button):
         self.open_dialog = Gtk.FileChooserNative.new(
@@ -109,6 +252,8 @@ class MainWindow(Gtk.ApplicationWindow):
             with open(self.input_file) as f:
                 data = f.read()
                 self.sourcebuf.set_text(data)
+                self.run_button.set_sensitive(True)
+                self.btn_lexico.set_sensitive(True)
 
     def guardar_archivo(self, button):
         if self.input_file:
@@ -118,6 +263,26 @@ class MainWindow(Gtk.ApplicationWindow):
             with open(self.input_file, 'r+') as f:
                 f.truncate(0)
                 f.write(data)
+
+    def mostrar_help(self, action, param):
+        url = 'file://' + os.getcwd() + '/../docs/index.html'
+        webbrowser.open(url)
+
+    def mostrar_about(self, action, param):
+        self.about_dialog = Gtk.AboutDialog()
+        self.about_dialog.set_transient_for(self)
+        self.about_dialog.set_modal(self)
+
+        self.about_dialog.set_comments(
+            '''Materia: Lenguajes y Autómatas 2
+Profesor: I.S.C. Ricardo González González
+Tecnológico Nacional de México en Celaya''')
+        self.about_dialog.set_authors([
+            "Iván Alejandro Ávalos Díaz (18032572)",
+            "Edgar Alexis Martínez López (18030817)"
+        ])
+        self.about_dialog.set_logo_icon_name('applications-development')
+        self.about_dialog.show()
 
     def correr(self, button):
         self.guardar_archivo(None)
@@ -173,6 +338,8 @@ class App(Adw.Application):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        GLib.set_application_name("Javañol para RGG")
 
         # Estilos CSS
         css_provider = Gtk.CssProvider()
