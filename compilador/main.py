@@ -16,8 +16,8 @@ class Main:
     step = None
 
     def print_help (self, arg0):
-        print("Uso: % s -i entrada.es -o salida.es" % arg0)
-        print("     % s -i entrada.es -o salida.es [-l|-p|-s] [-t]" % arg0)
+        print("Uso: % s -i entrada.es -o salida.es [-t]" % arg0)
+        print("     % s -i entrada.es -o salida.es [-l|-p|-s]" % arg0)
         print("     % s -h" % arg0)
 
     def main(self, argv):
