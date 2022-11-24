@@ -38,6 +38,7 @@ class Arbol:
         dot = gv.Digraph()
         dot.attr(rankdir='LR')
         dot.attr('node', fontname='monospace')
+        dot.attr('node', shape='box')
         self.raiz.render(dot, None)
         dot.render(filename, view = view)
 

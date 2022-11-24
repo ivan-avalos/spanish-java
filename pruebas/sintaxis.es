@@ -4,3 +4,4 @@ booleano c = verdadero;
 caracter d;
 imprimir a + b;
 imprimir "Hola, Mundo";
+leer a;

@@ -24,6 +24,7 @@ class Selector(Enum):
 
 class Parser:
     def __init__(self, input_file: str):
+        self.input_file = input_file
         self.arbol = Arbol()
         self.pila_selector = [
             [Selector.NINGUNO, []] # selector, recolector
@@ -41,7 +42,7 @@ class Parser:
                 r = self.procesar(t)
                 if r == Control.ERROR: return 1
 
-        print(str(self.arbol))
+        self.arbol.render(self.input_file + '.gv')
         return 0
 
     def procesar (self, t: LexToken):
