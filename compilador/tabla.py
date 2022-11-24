@@ -1,15 +1,14 @@
 import json, os
-from enum import Enum
+from enum import Enum, auto
 from dataclasses import dataclass
 from typing import Any
+from more_itertools import seekable
 
 reservadas = [
     'BOOLEAN',
-    'BREAK',
     'CHAR',
     'DOUBLE',
     'ELSE',
-    'FOR'
     'IDENT',
     'IF',
     'INT',
@@ -29,23 +28,63 @@ literales = [
     'STRING_LIT'
 ]
 
+class Token(Enum):
+    BOOLEAN = 'booleano'
+    CHAR = 'caracter'
+    DOUBLE = 'doble'
+    ELSE = 'sino'
+    IDENT = 'IDENT'
+    IF = 'si'
+    INT = 'entero'
+    PRINT = 'imprimir'
+    READ = 'leer'
+    RETURN = 'retorna'
+    STRING = 'cadena'
+    VOID = 'vacio'
+    WHILE = 'mientras'
+    BOOLEAN_LIT = 'BOOLEAN_LIT'
+    INT_LIT = 'INT_LIT'
+    CHAR_LIT = 'CHAR_LIT'
+    STRING_LIT = 'STRING_LIT'
+    L_BRACKET = '{'
+    R_BRACKET = '}'
+    L_PAREN = '('
+    R_PAREN = ')'
+    COMMA = ','
+    SQUOTE = '\''
+    DQUOTE = '"'
+    SEMICOLON = ';'
+    EQUAL = '='
+    TIMES = '*'
+    SLASH = '/'
+    PLUS = '+'
+    MINUS = '-'
+    GT = '>'
+    LT = '<'
+    GEQ = '>='
+    LEQ = '<='
+    AND = '&&'
+    OR = '||'
+    EQEQ = '=='
+    NOTEQ = '!='
+
 tokens = reservadas + literales + [
     '{', '}', '(', ')', ',', '\'',
     '"', ';', '=', '*', '/', '+',
     '-', '>', '<', '>=', '<=', '&&',
-    '||', '==', '!=', '++', '--', '//'
+    '||', '==', '!='
 ]
 
 @dataclass
 class LexToken:
-    tipo: str
+    tipo: Token
     nombre: str
     valor: Any
     numlinea: int
 
     def __str__(self):
         return "LexToken(%s,%s,%s,%i)" % (
-            self.tipo, self.nombre, self.valor, self.numlinea
+            self.tipo.name, self.nombre, self.valor, self.numlinea
         )
 
 class TablaLex:
@@ -58,6 +97,9 @@ class TablaLex:
     def buscar(self, nombre: str):
         return [t for t in self.tabla if t.nombre == nombre][0]
 
+    def iterar(self):
+        return seekable(self.tabla)
+
     def actualizar(self, nombre: str, tok: LexToken):
         for i, t in enumerate(self.tabla):
             if t.nombre == nombre:
@@ -68,7 +110,7 @@ class TablaLex:
         data = []
         for t in self.tabla:
             data.append({
-                'tipo': t.tipo,
+                'tipo': t.tipo.value,
                 'nombre': t.nombre,
                 'valor': t.valor,
                 'numlinea': t.numlinea
@@ -84,7 +126,7 @@ class TablaLex:
         with open(input_file, 'r') as f:
             data = json.loads(f.read())
             for t in data:
-                self.insertar(LexToken(t['tipo'],
+                self.insertar(LexToken(Token(t['tipo']),
                                        t['nombre'],
                                        t['valor'],
                                        t['numlinea']))

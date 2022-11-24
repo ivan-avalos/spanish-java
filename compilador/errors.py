@@ -1,4 +1,7 @@
 import sys
+from typing import List
+
+from tabla import Token
 
 class Error:
     errors = {
@@ -14,3 +17,7 @@ class Error:
 
     def __init__(self, error, numlinea):
         print("Error en línea %d: %s" % (numlinea, self.errors[error]), file=sys.stderr)
+
+    def __init__(self, got: Token, expects: List[Token], numlinea = int):
+        strexp = ', '.join(['`%s\'' % e.value for e in expects])
+        self.message = "Error en la línea %d, se encontró `%s', pero se esperaba %s" % (numlinea, got.value, strexp)

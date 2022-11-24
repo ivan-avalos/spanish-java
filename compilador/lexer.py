@@ -1,5 +1,5 @@
 from enum import Enum
-from tabla import LexToken, TablaLex, tokens
+from tabla import LexToken, TablaLex, Token, tokens
 from parser import Parser
 from shared import Control
 from errors import Error
@@ -34,6 +34,8 @@ class Selector(Enum):
     ENTERO = 5
 
 class Lexer:
+    tabla: TablaLex = None
+    
     def __init__(self, input_file: str):
         self.tabla = TablaLex()
         self.numlinea = 1
@@ -94,7 +96,7 @@ class Lexer:
                 return Control.SIGUIENTE
             # Entrada a tokens simples
             elif c in otros_tokens or (c == '*' and self.recol_comentario == ''):
-                self.insertar_tabla(c, None, None)
+                self.insertar_tabla(Token(c), None, None)
                 return Control.SIGUIENTE
 
             # Apertura de comentario
@@ -108,14 +110,14 @@ class Lexer:
                 rc = self.recol_operador + c
                 if rc in op_compuestos:
                     # Operador compuesto
-                    self.insertar_tabla(rc, None, None)
+                    self.insertar_tabla(Token(rc), None, None)
                     self.recol_operador = ''
                     return Control.SIGUIENTE
                 else:
                     # Operador simple
-                    self.insertar_tabla(self.recol_operador, None, None)
+                    self.insertar_tabla(Token(self.recol_operador), None, None)
                     if c in op_simples:
-                        self.insertar_tabla(c, None, None)
+                        self.insertar_tabla(Token(c), None, None)
                     self.recol_operador = ''
                     return Control.SIGUIENTE
 
@@ -143,7 +145,7 @@ class Lexer:
 
     def procesar_cadena(self, c):
         if c == '"':
-            self.insertar_tabla('STRING_LIT', None, self.recol_string)
+            self.insertar_tabla(Token.STRING_LIT, None, self.recol_string)
             self.selector = Selector.NINGUNO
             self.recol_string = ''
         else:
@@ -158,7 +160,7 @@ class Lexer:
             if len(self.recol_caracter) == 0:
                 Error('L_CAR_VACIO', self.numlinea)
                 return Control.ERROR
-            self.insertar_tabla('CHAR_LIT', None, self.recol_caracter)
+            self.insertar_tabla(Token.CHAR_LIT, None, self.recol_caracter)
             self.selector = Selector.NINGUNO
             self.recol_caracter = ''
         else:
@@ -181,13 +183,13 @@ class Lexer:
             self.recol_ident += c
         else:
             if self.recol_ident in reservadas.keys():
-                self.insertar_tabla(reservadas[self.recol_ident], None, None)
+                self.insertar_tabla(Token(self.recol_ident), None, None)
             elif self.recol_ident == 'verdadero':
-                self.insertar_tabla('BOOLEAN_LIT', None, True)
+                self.insertar_tabla(Token.BOOLEAN_LIT, None, True)
             elif self.recol_ident == 'falso':
-                self.insertar_tabla('BOOLEAN_LIT', None, False)
+                self.insertar_tabla(Token.BOOLEAN_LIT, None, False)
             else:
-                self.insertar_tabla('IDENT', self.recol_ident, None)
+                self.insertar_tabla(Token.IDENT, self.recol_ident, None)
             self.recol_ident = ''
             self.selector = Selector.NINGUNO
             return Control.REPETIR
@@ -197,7 +199,7 @@ class Lexer:
         if c.isdigit():
             self.recol_entero += c
         else:
-            self.insertar_tabla('INT_LIT', None, int(self.recol_entero))
+            self.insertar_tabla(Token.INT_LIT, None, int(self.recol_entero))
             self.recol_entero = ''
             self.selector = Selector.NINGUNO
             return Control.REPETIR
