@@ -15,9 +15,17 @@ class Error:
         'S_ESPERA_PC': 'Se esperaba `;`',
     }
 
-    def __init__(self, error, numlinea):
-        print("Error en línea %d: %s" % (numlinea, self.errors[error]), file=sys.stderr)
+    def __init__(self, msg: str = None):
+        self.message = msg
 
-    def __init__(self, got: Token, expects: List[Token], numlinea = int):
+    @classmethod
+    def lex(self, error, numlinea: int):
+        return Error("Error en línea %d: %s" % (numlinea, self.errors[error]))
+
+    @classmethod
+    def syntax(self, got: Token, expects: List[Token], numlinea: int):
+        error = Error()
         strexp = ', '.join(['`%s\'' % e.value for e in expects])
-        self.message = "Error en la línea %d, se encontró `%s', pero se esperaba %s" % (numlinea, got.value, strexp)
+        error.message = ("Error en la línea %d: se encontró `%s', pero se esperaba %s" %
+                        (numlinea, got.value, strexp))
+        return error

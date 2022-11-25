@@ -1,8 +1,9 @@
+from dataclasses import dataclass
 from typing import Optional
 
-from type import Type
-from ident import Ident
-from expr import Expr
+from astree.type import Type
+from astree.ident import Ident
+from astree.expr import Expr
 
 # A global declaration.
 #
@@ -11,11 +12,11 @@ from expr import Expr
 class DeclGlobal:
     ident: Ident
     _type: Type
-    init: Optional[Expr]
+    init: Expr
 
 # A function declaration.
 #
-#     vacio main() { ... }
+#     funcion vacio main() { ... }
 @dataclass
 class DeclFunc:
     ident: Ident

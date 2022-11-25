@@ -22,7 +22,8 @@ reservadas = {
     'leer': 'READ',
     'retorna': 'RETURN',
     'vacio': 'VOID',
-    'mientras': 'WHILE'
+    'mientras': 'WHILE',
+    'funcion': 'FUNCTION'
 }
 
 class Selector(Enum):
@@ -59,6 +60,9 @@ class Lexer:
                     r = self.procesar(c)
                     if r == Control.ERROR: return 1
             self.numlinea += 1
+
+        # End of file (EOF)
+        self.insertar_tabla(Token.EOF, None, None)
 
         # Exportar tabla de símbolos
         self.tabla.exportar(self.input_file + '.tab')
@@ -154,11 +158,11 @@ class Lexer:
 
     def procesar_caracter(self, c):
         if len(self.recol_caracter) > 1:
-            Error('L_CAR_LARGO', self.numlinea)
+            print(Error.lex('L_CAR_LARGO', self.numlinea).message)
             return Control.ERROR
         if c == '\'':
             if len(self.recol_caracter) == 0:
-                Error('L_CAR_VACIO', self.numlinea)
+                print(Error('L_CAR_VACIO', self.numlinea).message)
                 return Control.ERROR
             self.insertar_tabla(Token.CHAR_LIT, None, self.recol_caracter)
             self.selector = Selector.NINGUNO

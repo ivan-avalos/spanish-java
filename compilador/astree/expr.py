@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import List, Optional
 
-from type import Type
+from astree.type import Type
+
+Expr = None
 
 # An assignment expression
 #
@@ -43,7 +45,7 @@ class BinarithmExpr:
 #     foo(bar)
 @dataclass
 class CallExpr:
-    lvalue: Expr,
+    lvalue: Expr
     args: List[Expr]
 
 # A compound expression.
@@ -74,7 +76,7 @@ ConstantExpr = Value | NumberConstant
 @dataclass
 class ForExpr:
     bindings: Optional[Expr]
-    cond: Expr,
+    cond: Expr
     afterthought: Optional[Expr]
     body: Expr
 
@@ -83,8 +85,8 @@ class ForExpr:
 #    si (a) { } sino { }
 @dataclass
 class IfExpr:
-    cond: Expr,
-    tbranch: Expr,
+    cond: Expr
+    tbranch: Expr
     fbranch: Optional[Expr]
 
 # A print statement.

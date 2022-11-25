@@ -17,7 +17,8 @@ reservadas = [
     'RETURN',
     'STRING',
     'VOID',
-    'WHILE'
+    'WHILE',
+    'FUNCTION'
 ]
 
 literales = [
@@ -41,6 +42,7 @@ class Token(Enum):
     RETURN = 'retorna'
     STRING = 'cadena'
     VOID = 'vacio'
+    FUNCTION = 'funcion'
     WHILE = 'mientras'
     BOOLEAN_LIT = 'BOOLEAN_LIT'
     INT_LIT = 'INT_LIT'
@@ -67,6 +69,7 @@ class Token(Enum):
     OR = '||'
     EQEQ = '=='
     NOTEQ = '!='
+    EOF = 'EOF'
 
 tokens = reservadas + literales + [
     '{', '}', '(', ')', ',', '\'',
