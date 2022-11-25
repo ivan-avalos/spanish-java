@@ -135,7 +135,6 @@ class ParseExpr:
         elif tok.tipo == Token.READ:
             return self.read_expr()
             
-        
     def postfix(self, lvalue: Optional[Expr]) -> (Expr | Error):
         _lvalue: Optional[Expr] = lvalue
         if not lvalue:
@@ -216,6 +215,7 @@ class ParseExpr:
             rparen = self.parser.want(Token.R_PAREN)
             if type(rparen) is Error:
                 return rparen
+            return expr
         elif tok.tipo == Token.IDENT:
             ident = ParseIdent(self.parser).ident()
             if type(ident) is Error:
