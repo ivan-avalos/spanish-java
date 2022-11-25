@@ -15,8 +15,11 @@ class Error:
         'S_ESPERA_PC': 'Se esperaba `;`',
     }
 
-    def __init__(self, msg: str = None):
-        self.message = msg
+    def __init__(self, msg: str = None, numlinea: int = None):
+        if numlinea:
+            self.message = "Error en la línea %d: %s" % (numlinea, msg)
+        else:
+            self.message = msg
 
     @classmethod
     def lex(self, error, numlinea: int):

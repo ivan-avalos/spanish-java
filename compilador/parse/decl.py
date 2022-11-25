@@ -58,9 +58,13 @@ class ParseDecl:
         if type(proto) is Error:
             return proto
 
+        init = ParseExpr(self.parser).compound_expr()
+        if type(init) is Error:
+            return init
+
         return DeclFunc(ident = ident,
                         prototype = proto,
-                        body = None)
+                        body = init)
 
     # Parses a declaration.
     def decl(self) -> (Decl | Error):

@@ -3,10 +3,19 @@ from enum import Enum, auto
 from typing import List, Optional
 
 from astree.type import Type
+from astree.ident import Ident
 
 Expr = None
 
-# An assignment expression
+# An identifier access expression.
+#
+#     a
+AccessIdentifier = Ident
+
+# An access expression.
+AccessExpr = AccessIdentifier
+
+# An assignment expression.
 #
 #     a = 10
 @dataclass
@@ -14,7 +23,7 @@ class AssignExpr:
     _object: Expr
     value: Expr
 
-# A binary arithmetic operator
+# A binary arithmetic operator.
 class BinarithmOp(Enum):
     BAND = '&'
     BOR = '|'
@@ -92,19 +101,23 @@ class IfExpr:
 # A print statement.
 #
 #     imprimir a
-PrintExpr = Expr
+@dataclass
+class PrintExpr:
+    expr: Expr
 
 # A read statement.
 #
 #     leer a
-ReadExpr = Expr
+@dataclass
+class ReadExpr:
+    expr: AccessExpr
 
 # A return statement.
 #
 #     return a
 ReturnExpr = Optional[Expr]
 
-# A Javañol expression
-Expr = (AssignExpr | BinarithmExpr | CallExpr | ConstantExpr |
-        ForExpr | IfExpr | CompoundExpr | PrintExpr |
-        ReadExpr | ReturnExpr)
+# A Javañol expression.
+Expr = (AccessExpr | AssignExpr | BinarithmExpr | CallExpr |
+        ConstantExpr | ForExpr | IfExpr | CompoundExpr |
+        PrintExpr | ReadExpr | ReturnExpr)
