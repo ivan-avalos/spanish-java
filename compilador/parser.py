@@ -19,5 +19,5 @@ class Parser:
             print (unit.message, file=sys.stderr)
             return 1
 
-        pprint(self.unit)
+        pprint(unit)
         return 0

@@ -16,48 +16,36 @@ class ParseType:
             return tok
         return BuiltinType(tok.tipo)
 
-    def prototype(self) -> (FuncType | Error):
+    def prototype(self, _type: Type) -> (FuncType | Error):
         params: List[FuncParam] = []
-
-        # Tipo
-        tok = ParseType(self.parser)._type()
-        if type(tok) is Error:
-            return tok
-        _type = tok
 
         # (
         tok = self.parser.want(Token.L_PAREN)
         if type(tok) is Error:
             return tok
-        while True:
-            tok = self.parser._try(Token.R_PAREN)
-            if not tok:
-                break
-
+        
+        while not self.parser._try(Token.R_PAREN):
+            
             # Tipo
-            tok = ParseType(self.parser)._type()
-            if type(tok) is Error:
-                return tok
-            __type: Type = tok
+            __type = ParseType(self.parser)._type()
+            if type(__type) is Error:
+                return __type
 
             # Identificador
-            tok = self.parser.want(Token.IDENT)
-            if type(tok) is Error:
-                return tok
-            name: str = tok
+            name = self.parser.want(Token.IDENT)
+            if type(name) is Error:
+                return name
 
             params.append(FuncParam(name = name,
                                     _type = __type))
 
             # ,
-            tok = self.parser._try(Token.COMMA)
-            if not tok:
+            if self.parser._try(Token.COMMA):
                 continue
 
             # )
-            tok = self.parser.want(Token.R_PAREN)
-            if type(tok) is Error:
-                return tok
+            if self.parser._try(Token.R_PAREN):
+                break
 
         return FuncType(result = _type,
                         params = params)

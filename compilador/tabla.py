@@ -2,7 +2,9 @@ import json, os
 from enum import Enum, auto
 from dataclasses import dataclass
 from typing import Any
-from more_itertools import seekable
+# from more_itertools import seekable
+
+from nanoiter import NanoIter
 
 reservadas = [
     'BOOLEAN',
@@ -101,7 +103,7 @@ class TablaLex:
         return [t for t in self.tabla if t.nombre == nombre][0]
 
     def iterar(self):
-        return seekable(self.tabla)
+        return NanoIter(self.tabla)
 
     def actualizar(self, nombre: str, tok: LexToken):
         for i, t in enumerate(self.tabla):

@@ -7,12 +7,13 @@ from errors import Error
 from typing import NoReturn
 from more_itertools import seekable
 
+from nanoiter import NanoIter
 from tabla import TablaLex, Token
 from errors import Error
 
 class BaseParser:
-    def __init__(self, iterador: seekable):
-        self.iterador: seekable = iterador
+    def __init__(self, iterador: NanoIter):
+        self.iterador: NanoIter = iterador
 
     ''' Requires the next token to have a matching ltok. Returns that
     token, or an error. '''
@@ -49,10 +50,10 @@ class BaseParser:
                 return tok
 
     def lex(self):
-        return next(self.iterador)
+        return self.iterador.next()
 
     def unlex(self):
-        self.iterador.seek(-1)
+        self.iterador.back()
 
     ''' Returns a syntax error if cond is false and void otherwise '''
     def synassert(self, cond: bool, msg: str) -> (Error | NoReturn):

@@ -54,7 +54,7 @@ class ParseDecl:
             return ident
 
         # Prototipo
-        proto = ParseType(self.parser).prototype()
+        proto = ParseType(self.parser).prototype(_type)
         if type(proto) is Error:
             return proto
 
@@ -70,12 +70,16 @@ class ParseDecl:
 
     # Parses a declaration.
     def decl(self) -> (Decl | Error):
-        toks = [Token.BOOLEAN, Token.CHAR, Token.INT, Token.STRING, Token.VOID]
-        _next = self.parser.peek(*toks)
+        toks = [Token.BOOLEAN, Token.CHAR, Token.INT, Token.STRING, Token.VOID, Token.FUNCTION]
+        _next = self.parser.want(*toks)
         decl: Optional[Decl] = None
-        if not _next:
+        if type(_next) is Error:
+            return _next
+        elif _next.tipo is Token.FUNCTION:
+            self.parser.unlex()
             decl = self.decl_func()
         else:
+            self.parser.unlex()
             decl = self.decl_global()
 
         if type(decl) is Error:

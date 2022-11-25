@@ -7,6 +7,6 @@ class ParseExpr:
         self.parser = parser
 
     def expr(self) -> Expr | Error:
-        next(self.parser.iterador)
+        self.parser.iterador.next()
         return
     
