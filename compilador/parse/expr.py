@@ -34,16 +34,13 @@ class ParseExpr:
         
     # WIP
     def binarithm(self, lvalue: Expr, i: int) -> (Expr | Error):
-        print(f'binarithm({lvalue}, {i})')
         _lvalue = lvalue
         if not lvalue:
             _lvalue = self.cast(lvalue)
             if type(_lvalue) is Error:
                 return _lvalue
-        print(f'lvalue = {_lvalue}')
         
         tok = self.parser.lex()
-        print(f'tok = {tok}')
         j: int = self.precedence(tok.tipo)
         while j >= i:
             op = self.binop_for_tok(tok.tipo)
@@ -106,7 +103,8 @@ class ParseExpr:
             # }
             item = self.parser.peek(Token.R_BRACKET)
             if item: break
-            
+
+            # Expresión
             item = self.expr()
             if type(item) is Error:
                 return item
@@ -147,7 +145,7 @@ class ParseExpr:
             return _lvalue
 
         _next: Optional[LexToken] = None
-        if tok == Token.L_PAREN:
+        if tok.tipo == Token.L_PAREN:
             return self.call(_lvalue)
 
         return self.postfix(_next)
