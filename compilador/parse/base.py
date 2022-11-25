@@ -15,9 +15,11 @@ class BaseParser:
     def __init__(self, iterador: NanoIter):
         self.iterador: NanoIter = iterador
 
-    ''' Requires the next token to have a matching ltok. Returns that
-    token, or an error. '''
     def want(self, *want: Token) -> (LexToken | Error):
+        '''Requires the next token to have a matching ltok. Returns
+        that token, or an error.
+
+        '''
         tok: LexToken = self.lex()
         if len(want) == 0:
             return tok
@@ -27,10 +29,12 @@ class BaseParser:
 
         return Error.syntax(tok.tipo, want, tok.numlinea)
 
-    ''' Looks for a matching ltok from the lexer, and if not present,
-    unlexes the token and returns void. If found, the token is
-    consumed from the lexer and is returned. '''
     def _try(self, *want: Token) -> (LexToken | NoReturn):
+        '''Looks for a matching ltok from the lexer, and if not
+        present, unlexes the token and returns void. If found, the
+        token is consumed from the lexer and is returned.
+
+        '''
         tok: LexToken = self.lex()
         if len(want) == 0:
             return tok
@@ -39,9 +43,11 @@ class BaseParser:
                 return tok
         self.unlex()
 
-    ''' Looks for a matching ltok from the lexer, unlexes the token,
-    and returns it; or void if it was not an ltok. '''
     def peek(self, *want: Token) -> (LexToken | NoReturn):
+        '''Looks for a matching ltok from the lexer, unlexes the
+        token, and returns it; or void if it was not an ltok.
+
+        '''
         tok: LexToken = self.iterador.peek()
         if len(want) == 0:
             return tok
@@ -55,7 +61,10 @@ class BaseParser:
     def unlex(self):
         self.iterador.back()
 
-    ''' Returns a syntax error if cond is false and void otherwise '''
     def synassert(self, cond: bool, msg: str) -> (Error | NoReturn):
+        '''Returns a syntax error if cond is false and void
+        otherwise.
+
+        '''
         if not cond:
             return Error(msg = msg)

@@ -58,12 +58,6 @@ class ParseDecl:
         if type(proto) is Error:
             return proto
 
-        # ;
-        # semicolon = self.parser.want(Token.SEMICOLON)
-        # if type(semicolon) is Error:
-        #     return semicolon
-        # self.parser.unlex()
-
         return DeclFunc(ident = ident,
                         prototype = proto,
                         body = None)
@@ -96,8 +90,6 @@ class ParseDecl:
     def decls(self) -> (List[Decl] | Error):
         decls: List[Decl] = []
         while not self.parser.peek(Token.EOF):
-            # print(self.parser.peek())
-            # print(next(self.parser.iterador))
             decl = self.decl()
             if type(decl) is Error:
                 return decl
