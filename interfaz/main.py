@@ -424,7 +424,7 @@ class App(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        GLib.set_application_name("Javañol para RGG")
+        GLib.set_application_name("Javañol RGG edition")
 
         # Estilos CSS
         css_provider = Gtk.CssProvider()

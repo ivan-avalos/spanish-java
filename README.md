@@ -11,9 +11,9 @@ funcional. Eso depende del tiempo que sus autores dediquen en él; no
 les recomiendo poner su confianza en que suceda.
 
 Este proyecto se realizó para la materia de Lenguajes y Autómatas 2,
-con el profesor I.S.C. Ricardo González González. Somos estudiantes de
-Ingeniería en Sistemas Computacionales, en el [Tecnológico Nacional de
-México en Celaya](https://celaya.tecnm.mx/).
+con el profesor I.S.C. Ricardo González González (RGG). Somos
+estudiantes de Ingeniería en Sistemas Computacionales, en el
+[Tecnológico Nacional de México en Celaya](https://celaya.tecnm.mx/).
 
 Un agradecimiento especial a [Drew DeVault](https://drewdevault.com/),
 quien creó el lenguaje de programación [Hare](https://harelang.org),
