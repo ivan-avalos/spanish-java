@@ -7,20 +7,20 @@ from typing import Any
 from nanoiter import NanoIter
 
 reservadas = [
-    'BOOLEAN',
-    'CHAR',
-    'DOUBLE',
-    'ELSE',
-    'IDENT',
-    'IF',
-    'INT',
-    'PRINT',
-    'READ',
-    'RETURN',
-    'STRING',
-    'VOID',
-    'WHILE',
-    'FUNCTION'
+    'booleano',
+    'cadena',
+    'caracter',
+    'continuar',
+    'detener',
+    'entero',
+    'funcion',
+    'imprimir',
+    'leer',
+    'mientras',
+    'retornar',
+    'si',
+    'sino',
+    'vacio',
 ]
 
 literales = [
@@ -29,6 +29,13 @@ literales = [
     'DOUBLE_LIT',
     'INT_LIT',
     'STRING_LIT'
+]
+
+tokens = reservadas + literales + [
+    '{', '}', '(', ')', ',', '\'',
+    '"', ';', '=', '*', '/', '+',
+    '-', '>', '<', '>=', '<=', '&&',
+    '||', '==', '!='
 ]
 
 class Token(Enum):
@@ -41,7 +48,9 @@ class Token(Enum):
     INT = 'entero'
     PRINT = 'imprimir'
     READ = 'leer'
-    RETURN = 'retorna'
+    BREAK = 'detener'
+    CONTINUE = 'continuar'
+    RETURN = 'retornar'
     STRING = 'cadena'
     VOID = 'vacio'
     FUNCTION = 'funcion'
@@ -73,12 +82,7 @@ class Token(Enum):
     NOTEQ = '!='
     EOF = 'EOF'
 
-tokens = reservadas + literales + [
-    '{', '}', '(', ')', ',', '\'',
-    '"', ';', '=', '*', '/', '+',
-    '-', '>', '<', '>=', '<=', '&&',
-    '||', '==', '!='
-]
+
 
 @dataclass
 class LexToken:

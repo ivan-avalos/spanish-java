@@ -49,6 +49,13 @@ class BinarithmExpr:
     lvalue: Expr
     rvalue: Expr
 
+# A break expression.
+#
+#     detener
+@dataclass
+class BreakExpr:
+    pass
+
 # A function call expression.
 #
 #     foo(bar)
@@ -67,6 +74,13 @@ class CallExpr:
 @dataclass
 class CompoundExpr:
     exprs: List[Expr]
+
+# A continue expression.
+#
+#     continuar
+@dataclass
+class ContinueExpr:
+    pass
 
 # A scalar value.
 Value = bool | str | int | type(None)
@@ -115,7 +129,9 @@ class ReadExpr:
 # A return statement.
 #
 #     retorna a
-ReturnExpr = Optional[Expr]
+@dataclass
+class ReturnExpr:
+    expr: Optional[Expr]
 
 # A while expression.
 #
@@ -126,6 +142,7 @@ class WhileExpr:
     body: Expr
 
 # A Javañol expression.
-Expr = (AccessExpr | AssignExpr | BinarithmExpr | CallExpr |
-        ConstantExpr | ForExpr | IfExpr | CompoundExpr |
-        PrintExpr | ReadExpr | ReturnExpr)
+Expr = (AccessExpr | AssignExpr | BinarithmExpr | BreakExpr |
+        CallExpr | ConstantExpr | ContinueExpr | ForExpr |
+        IfExpr | CompoundExpr | PrintExpr | ReadExpr |
+        ReturnExpr)

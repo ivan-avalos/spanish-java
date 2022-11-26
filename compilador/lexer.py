@@ -1,5 +1,5 @@
 from enum import Enum
-from tabla import LexToken, TablaLex, Token, tokens
+from tabla import LexToken, TablaLex, Token, tokens, reservadas
 from parser import Parser
 from shared import Control
 from errors import Error
@@ -9,22 +9,6 @@ op_simples_a = ['=', '+', '-', '&', '|'] # pueden ir al final del op compuesto
 op_simples_b = ['!', '<', '>']           # solo pueden ir al inicio del op compuesto
 op_simples = op_simples_a + op_simples_b
 otros_tokens = ['{', '}', '(', ')', ',', '.', ';']
-reservadas = {
-    'booleano': 'BOOLEAN',
-    'detener': 'BREAK',
-    'cadena': 'STRING',
-    'caracter': 'CHAR',
-    'sino': 'ELSE',
-    'porcada': 'FOR',
-    'si': 'IF',
-    'entero': 'INT',
-    'imprimir': 'PRINT',
-    'leer': 'READ',
-    'retorna': 'RETURN',
-    'vacio': 'VOID',
-    'mientras': 'WHILE',
-    'funcion': 'FUNCTION'
-}
 
 class Selector(Enum):
     NINGUNO = 0
@@ -186,7 +170,7 @@ class Lexer:
         if c.isalnum() or c == '_':
             self.recol_ident += c
         else:
-            if self.recol_ident in reservadas.keys():
+            if self.recol_ident in reservadas:
                 self.insertar_tabla(Token(self.recol_ident), None, None)
             elif self.recol_ident == 'verdadero':
                 self.insertar_tabla(Token.BOOLEAN_LIT, None, True)

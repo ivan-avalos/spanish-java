@@ -4,7 +4,7 @@ from tabla import Token, LexToken
 from parse.base import BaseParser
 from parse.ident import ParseIdent
 from errors import Error
-from astree.expr import Expr, BinarithmOp, ConstantExpr, NumberConstant, CallExpr, PrintExpr, BinarithmExpr, CompoundExpr, ReadExpr, AccessExpr, AssignExpr, IfExpr, WhileExpr
+from astree.expr import *
 
 class ParseExpr:
     def __init__(self, parser: BaseParser):
@@ -12,11 +12,14 @@ class ParseExpr:
 
     def expr(self) -> (Expr | Error):
         obj = None
-        tok = self.parser.peek(Token.IF, Token.WHILE)
+        tok = self.parser.peek(Token.IF, Token.BREAK, Token.CONTINUE,
+                               Token.RETURN, Token.WHILE)
         if not tok:
             obj = self.binarithm(None, 0)
         elif tok.tipo == Token.IF:
             obj = self.if_expr()
+        elif tok.tipo in [Token.BREAK, Token.CONTINUE, Token.RETURN]:
+            obj = self.control()
         elif tok.tipo == Token.WHILE:
             obj = self.while_expr()
 
@@ -141,6 +144,28 @@ class ParseExpr:
             expr: bool = tok.valor
         else:
             return Error(msg = "Se esperaba una constante.", numlinea = tok.numlinea)
+        return expr
+
+    def control(self) -> (Expr | Error):
+        tok = self.parser.want(Token.BREAK, Token.CONTINUE, Token.RETURN)
+        if type(tok) is Error:
+            return tok
+
+        expr = None
+        if tok.tipo == Token.BREAK:
+            expr = BreakExpr()
+        elif tok.tipo == Token.CONTINUE:
+            expr = ContinueExpr()
+        elif tok.tipo == Token.RETURN:
+            tok = self.parser.peek(Token.COMMA, Token.SEMICOLON, Token.EOF)
+            if not tok:
+                _expr = self.expr()
+                if type(_expr) is Error:
+                    return _expr
+                expr = ReturnExpr(expr = _expr)
+            else:
+                expr = ReturnExpr(expr = None)
+
         return expr
 
     def builtin(self) -> (Expr | Error):

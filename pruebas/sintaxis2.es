@@ -9,11 +9,17 @@ funcion entero a (entero a, cadena b) {
         imprimir (b + 20);
     } sino b;
     leer d;
+    retornar 10 + 20;
 };
 funcion caracter b (booleano a) {
     imprimir ("Adiós");
     mientras (a < 10) {
         imprimir ("Hola");
+        si (a >= 10) {
+            continuar;
+        } sino detener;
+        a = a + 1;
     };
     leer x;
+    retornar;
 };
