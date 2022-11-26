@@ -93,7 +93,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.set_title('Javañol para RGG')
+        self.set_title('Javañol RGG edition')
         self.set_icon_name('text-editor')
         self.set_default_size(800, 600)
 

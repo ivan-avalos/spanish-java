@@ -16,7 +16,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 from tabla import LexToken, TablaLex, tokens
-from arbol import Arbol, Nodo
 from shared import Control
 from pprint import pprint
 from errors import Error
@@ -81,6 +80,6 @@ class BaseParser:
         '''Returns a syntax error if cond is false and void
         otherwise.
 
-        '''<
+        '''
         if not cond:
             return Error(msg = msg, numlinea = numlinea)
