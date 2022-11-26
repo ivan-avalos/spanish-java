@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import sys
+import sys, pickle
 import graphviz as gv
 from pprint import pprint
 
@@ -37,8 +37,14 @@ class Parser:
             print (unit.message, file=sys.stderr)
             return 1
 
+        # Renderizar AST
         dot = gv.Digraph()
         dot.attr('node', fontname='monospace')
         unit.graph(dot)
         dot.render(self.input_file + '.gv')
+
+        # Serializar AST
+        with open(self.input_file + '.ast', 'wb') as f:
+            pickle.dump(unit, f)
+        
         return 0
