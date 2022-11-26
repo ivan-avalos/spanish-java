@@ -24,7 +24,7 @@ from astree.graphable import Graphable
 from astree.type import Type
 from astree.ident import Ident
 
-Expr = None
+Expr = type(None)
 
 # An identifier access expression.
 #

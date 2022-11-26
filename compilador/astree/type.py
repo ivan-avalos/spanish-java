@@ -24,7 +24,7 @@ from enum import Enum
 from astree.graphable import Graphable
 from tabla import Token
 
-Type = None
+Type = type(None)
 
 # A built-in primitive type (int, bool, str, etc).
 class BuiltinType(Enum):
