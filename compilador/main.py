@@ -1,7 +1,5 @@
 import sys, getopt, os, traceback
 from enum import Enum
-from tkinter import *
-from tkinter import ttk, filedialog
 from lexer import *
 
 class Step(Enum):
