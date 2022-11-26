@@ -10,6 +10,8 @@ algún día llegue a convertirse en un lenguaje real tampoco muy
 funcional. Eso depende del tiempo que sus autores dediquen en él; no
 les recomiendo poner su confianza en que suceda.
 
+![Interfaz de usuario](screenshot.png)
+
 Este proyecto se realizó para la materia de Lenguajes y Autómatas 2,
 con el profesor I.S.C. Ricardo González González (RGG). Somos
 estudiantes de Ingeniería en Sistemas Computacionales, en el

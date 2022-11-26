@@ -153,7 +153,7 @@ class ParseExpr:
     def constant(self) -> (Expr | Error):
         tok: LexToken = self.parser.lex()
         expr: Optional[ConstantExpr] = None
-        if tok.tipo in [Token.STRING_LIT, Token.BOOLEAN_LIT]:
+        if tok.tipo in [Token.STRING_LIT, Token.BOOLEAN_LIT, Token.CHAR_LIT]:
             expr = Value(value = tok.valor)
         elif tok.tipo == Token.INT_LIT:
             expr = NumberConstant(value = tok.valor)
