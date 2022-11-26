@@ -197,7 +197,7 @@ class PrintExpr(Graphable):
 #
 #     leer a
 @dataclass
-class ReadExpr:
+class ReadExpr(Graphable):
     expr: AccessExpr
 
     def graph(self, dot: gv.Digraph, parent: str = None, edge: str = None) -> None:
@@ -210,7 +210,7 @@ class ReadExpr:
 #
 #     retorna a
 @dataclass
-class ReturnExpr:
+class ReturnExpr(Graphable):
     expr: Optional[Expr]
 
     def graph(self, dot: gv.Digraph, parent: str = None, edge: str = None) -> None:
