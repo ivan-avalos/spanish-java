@@ -114,8 +114,16 @@ class ReadExpr:
 
 # A return statement.
 #
-#     return a
+#     retorna a
 ReturnExpr = Optional[Expr]
+
+# A while expression.
+#
+#     mientras (cond) { }
+@dataclass
+class WhileExpr:
+    cond: Expr
+    body: Expr
 
 # A Javañol expression.
 Expr = (AccessExpr | AssignExpr | BinarithmExpr | CallExpr |

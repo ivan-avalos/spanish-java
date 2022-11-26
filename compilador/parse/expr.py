@@ -4,14 +4,24 @@ from tabla import Token, LexToken
 from parse.base import BaseParser
 from parse.ident import ParseIdent
 from errors import Error
-from astree.expr import Expr, BinarithmOp, ConstantExpr, NumberConstant, CallExpr, PrintExpr, BinarithmExpr, CompoundExpr, ReadExpr, AccessExpr, AssignExpr
+from astree.expr import Expr, BinarithmOp, ConstantExpr, NumberConstant, CallExpr, PrintExpr, BinarithmExpr, CompoundExpr, ReadExpr, AccessExpr, AssignExpr, IfExpr, WhileExpr
 
 class ParseExpr:
     def __init__(self, parser: BaseParser):
         self.parser = parser
 
     def expr(self) -> (Expr | Error):
-        obj = self.binarithm(None, 0)
+        obj = None
+        tok = self.parser.peek(Token.IF, Token.WHILE)
+        if not tok:
+            obj = self.binarithm(None, 0)
+        elif tok.tipo == Token.IF:
+            obj = self.if_expr()
+        elif tok.tipo == Token.WHILE:
+            obj = self.while_expr()
+
+        if type(obj) is Error:
+            return obj
 
         # =
         tok = self.parser._try(Token.EQUAL)
@@ -32,7 +42,6 @@ class ParseExpr:
         return AssignExpr(_object = obj,
                           value = expr)
         
-    # WIP
     def binarithm(self, lvalue: Expr, i: int) -> (Expr | Error):
         _lvalue = lvalue
         if not lvalue:
@@ -91,6 +100,9 @@ class ParseExpr:
         return CallExpr(lvalue = lvalue,
                         args = args)
 
+    def cast(self, lvalue: Optional[Expr]) -> (Expr | Error):
+        return self.unarithm()
+
     def compound_expr(self) -> (Expr | Error):
         items: List[Expr] = []
 
@@ -99,16 +111,11 @@ class ParseExpr:
         if type(lbracket) is Error:
             return lbracket
 
-        while True:
-            # }
-            item = self.parser.peek(Token.R_BRACKET)
-            if item: break
-
+        while not self.parser.peek(Token.R_BRACKET):
             # Expresión
             item = self.expr()
             if type(item) is Error:
                 return item
-            
             items.append(item)
 
             # ;
@@ -123,6 +130,19 @@ class ParseExpr:
 
         return CompoundExpr(exprs = items)
 
+    def constant(self) -> (Expr | Error):
+        tok: LexToken = self.parser.lex()
+        expr: Optional[ConstantExpr] = None
+        if tok.tipo == Token.STRING_LIT:
+            expr: str = tok.valor
+        elif tok.tipo == Token.INT_LIT:
+            expr = NumberConstant(value = tok.valor)
+        elif tok.tipo == Token.BOOLEAN_LIT:
+            expr: bool = tok.valor
+        else:
+            return Error(msg = "Se esperaba una constante.", numlinea = tok.numlinea)
+        return expr
+
     def builtin(self) -> (Expr | Error):
         tok: LexToken = self.parser.peek(Token.PRINT, Token.READ)
         if not tok:
@@ -132,6 +152,43 @@ class ParseExpr:
             return self.print_expr()
         elif tok.tipo == Token.READ:
             return self.read_expr()
+
+    def if_expr(self) -> (Expr | Error):
+        # si
+        _if = self.parser.want(Token.IF)
+        if type(_if) is Error:
+            return _if
+
+        # (
+        lparen = self.parser.want(Token.L_PAREN)
+        if type(lparen) is Error:
+            return lparen
+
+        # Condición
+        cond = self.expr()
+        if type(cond) is Error:
+            return cond
+
+        # )
+        rparen = self.parser.want(Token.R_PAREN)
+        if type(rparen) is Error:
+            return rparen
+
+        # Verdadero
+        tbranch = self.expr()
+        if type(tbranch) is Error:
+            return tbranch
+
+        # Falso
+        fbranch = None
+        if self.parser._try(Token.ELSE):
+            fbranch = self.expr()
+            if type(fbranch) is Error:
+                return fbranch
+
+        return IfExpr(cond = cond,
+                      tbranch = tbranch,
+                      fbranch = fbranch)
             
     def postfix(self, lvalue: Optional[Expr]) -> (Expr | Error):
         _lvalue: Optional[Expr] = lvalue
@@ -180,23 +237,7 @@ class ParseExpr:
         
         return ReadExpr(expr = ident)
 
-    # WIP
-    def cast(self, lvalue: Optional[Expr]) -> (Expr | Error):
-        return self.unarithm()
-
-    # WIP
-    def constant(self) -> (Expr | Error):
-        tok: LexToken = self.parser.lex()
-        expr: Optional[ConstantExpr] = None
-        if tok.tipo == Token.STRING_LIT:
-            expr: str = tok.valor
-        elif tok.tipo == Token.INT_LIT:
-            expr = NumberConstant(value = tok.valor)
-        elif tok.tipo == Token.BOOLEAN_LIT:
-            expr: bool = tok.valor
-        else:
-            return Error(msg = "Se esperaba una constante.", numlinea = tok.numlinea)
-        return expr
+    
 
     # WIP
     def plain_expression(self) -> (Expr | Error):
@@ -221,7 +262,39 @@ class ParseExpr:
             return ident
 
     def unarithm(self) -> (Expr | Error):
+        if self.parser._try(Token.L_BRACKET):
+            self.parser.unlex()
+            return self.compound_expr()
         return self.builtin()
+
+    def while_expr(self) -> (Expr | Error):
+        # mientras
+        _while = self.parser.want(Token.WHILE)
+        if type(_while) is Error:
+            return _while
+
+        # (
+        lparen = self.parser.want(Token.L_PAREN)
+        if type(lparen) is Error:
+            return lparen
+
+        # Condición
+        cond = self.expr()
+        if type(cond) is Error:
+            return cond
+
+        # )
+        rparen = self.parser.want(Token.R_PAREN)
+        if type(rparen) is Error:
+            return rparen
+
+        # Expresión
+        body = self.expr()
+        if type(body) is Error:
+            return body
+        
+        return WhileExpr(cond = cond,
+                         body = body)
 
     def binop_for_tok(self, tok: Token) -> (BinarithmOp | NoReturn):
         if tok is Token.SLASH:
@@ -246,10 +319,16 @@ class ParseExpr:
             return BinarithmOp.TIMES
 
     def precedence(self, tok: Token) -> int:
-        if tok in [Token.EQEQ, Token.NOTEQ]:
+        if tok == Token.OR:
             return 0
-        elif tok in [Token.PLUS, Token.MINUS]:
+        elif tok == Token.AND:
             return 1
-        elif tok in [Token.TIMES, Token.SLASH]:
+        elif tok in [Token.EQEQ, Token.NOTEQ]:
             return 2
+        elif tok in [Token.LT, Token.LEQ, Token.GT, Token.GEQ]:
+            return 3
+        elif tok in [Token.PLUS, Token.MINUS]:
+            return 4
+        elif tok in [Token.TIMES, Token.SLASH]:
+            return 5
         return -1
