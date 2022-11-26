@@ -42,7 +42,14 @@ directorio raíz del proyecto, y ejecutar el siguiente script (solo
 para GNU/Linux):
 
 ```bash
-./run_gui.sh
+bash run_gui.sh
+```
+
+Si no tienes GNU/Linux, puedes hacer lo siguiente:
+
+```bash
+cd interfaz/
+python main.py
 ```
 
 ## Licencia
