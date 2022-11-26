@@ -236,10 +236,7 @@ class ParseExpr:
             return ident
         
         return ReadExpr(expr = ident)
-
     
-
-    # WIP
     def plain_expression(self) -> (Expr | Error):
         tok: LexToken = self.parser.peek()
         if tok.tipo in [Token.BOOLEAN_LIT, Token.CHAR_LIT, Token.INT_LIT, Token.STRING_LIT]:
