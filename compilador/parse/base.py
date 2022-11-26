@@ -61,10 +61,10 @@ class BaseParser:
     def unlex(self):
         self.iterador.back()
 
-    def synassert(self, cond: bool, msg: str) -> (Error | NoReturn):
+    def synassert(self, cond: bool, msg: str, numlinea: int) -> (Error | NoReturn):
         '''Returns a syntax error if cond is false and void
         otherwise.
 
         '''
         if not cond:
-            return Error(msg = msg)
+            return Error(msg = msg, numlinea = numlinea)

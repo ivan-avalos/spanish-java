@@ -1,4 +1,5 @@
 import sys
+import graphviz as gv
 from pprint import pprint
 
 from tabla import TablaLex
@@ -8,6 +9,7 @@ from parse.unit import ParseUnit
 
 class Parser:
     def __init__(self, input_file: str):
+        self.input_file = input_file
         self.tabla = TablaLex()
         self.tabla.importar(input_file + '.tab')
         self.iterador = self.tabla.iterar()
@@ -19,5 +21,8 @@ class Parser:
             print (unit.message, file=sys.stderr)
             return 1
 
-        pprint(unit)
+        dot = gv.Digraph()
+        dot.attr('node', fontname='monospace')
+        unit.graph(dot)
+        dot.render(self.input_file + '.gv')
         return 0

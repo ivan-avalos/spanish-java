@@ -36,7 +36,7 @@ class ParseType:
             if type(name) is Error:
                 return name
 
-            params.append(FuncParam(name = name,
+            params.append(FuncParam(name = name.nombre,
                                     _type = __type))
 
             # ,

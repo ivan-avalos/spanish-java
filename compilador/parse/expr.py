@@ -33,7 +33,8 @@ class ParseExpr:
 
         error = self.parser.synassert(
             isinstance(obj, AccessExpr),
-            "Se esperaba un objeto como destino de la asignación.")
+            "Se esperaba un objeto como destino de la asignación.",
+            numlinea = tok.numlinea)
         if type(error) is Error:
             return error
 
@@ -88,7 +89,7 @@ class ParseExpr:
             # Expresión
             expr = self.expr()
             if type(expr) is Error:
-                return epr
+                return expr
 
             args.append(expr)
 
@@ -136,12 +137,10 @@ class ParseExpr:
     def constant(self) -> (Expr | Error):
         tok: LexToken = self.parser.lex()
         expr: Optional[ConstantExpr] = None
-        if tok.tipo == Token.STRING_LIT:
-            expr: str = tok.valor
+        if tok.tipo in [Token.STRING_LIT, Token.BOOLEAN_LIT]:
+            expr = Value(value = tok.valor)
         elif tok.tipo == Token.INT_LIT:
             expr = NumberConstant(value = tok.valor)
-        elif tok.tipo == Token.BOOLEAN_LIT:
-            expr: bool = tok.valor
         else:
             return Error(msg = "Se esperaba una constante.", numlinea = tok.numlinea)
         return expr
@@ -260,7 +259,7 @@ class ParseExpr:
         if type(ident) is Error:
             return ident
         
-        return ReadExpr(expr = ident)
+        return ReadExpr(expr = AccessExpr(ident = ident))
     
     def plain_expression(self) -> (Expr | Error):
         tok: LexToken = self.parser.peek()
@@ -281,7 +280,7 @@ class ParseExpr:
             ident = ParseIdent(self.parser).ident()
             if type(ident) is Error:
                 return ident
-            return ident
+            return AccessIdentifier(ident = ident)
 
     def unarithm(self) -> (Expr | Error):
         if self.parser._try(Token.L_BRACKET):
