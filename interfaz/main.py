@@ -295,7 +295,6 @@ Tecnológico Nacional de México en Celaya''')
             "Iván Alejandro Ávalos Díaz (18032572)",
             "Edgar Alexis López Martínez (18030817)"
         ])
-        self.about_dialog.set_logo_icon_name('applications-development')
         self.about_dialog.set_license(
             '''Copyright (C) 2022  Iván Alejandro Ávalos Díaz <avalos@disroot.org>,
                     Edgar Alexis López Martínez <edgarmlmp@gmail.com>
@@ -313,6 +312,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
             ''')
+        logo = Gtk.Image.new_from_file('credits.png')
+        self.about_dialog.set_logo(logo)
         self.about_dialog.show()
 
     def analisis_lexico(self, button):
