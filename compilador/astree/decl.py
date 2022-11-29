@@ -40,6 +40,9 @@ class DeclGlobal(Graphable):
         name_ident = uuid.uuid1().hex
         dot.node(name_ident, self.ident)
         dot.edge(name, name_ident, label = 'ident')
+        name_type = uuid.uuid1().hex
+        dot.node(name_type, self._type.value.value)
+        dot.edge(name, name_type, label = 'type')
         if isinstance(self.init, Graphable):
             self.init.graph(dot, name, 'init')
 
