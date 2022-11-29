@@ -354,6 +354,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             self.sem_semantico.set_color(Semaforo.Color.AMARILLO)
             self.btn_semantico.set_sensitive(True)
             self.llenar_tabla()
+            webbrowser.open ('file://' + self.input_file + '.gv.pdf')
         else:
             self.sem_sintactico.set_color(Semaforo.Color.ROJO)
             self.btn_sintactico.set_sensitive(False)
@@ -390,6 +391,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
         if result.returncode == 0:
             self.llenar_tabla()
+            webbrowser.open('file://' + self.input_file + '.gv.pdf')
 
     def limpiar_tabla(self):
         for i in range(4):
