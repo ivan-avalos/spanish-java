@@ -19,7 +19,7 @@ import gi, sys, os, subprocess, json, math, webbrowser
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 gi.require_version('GtkSource', '5')
-from gi.repository import Gtk, Gdk, Gio, GLib, Adw, GtkSource, Pango
+from gi.repository import Gtk, Gdk, GdkPixbuf, Gio, GLib, Adw, GtkSource, Pango
 
 compilador_dir = '../compilador/main.py'
 
@@ -312,7 +312,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
             ''')
-        logo = Gtk.Image.new_from_file('credits.png')
+        gfile = Gio.File.new_for_path('credits.png')
+        logo = Gdk.Texture.new_from_file(gfile)
         self.about_dialog.set_logo(logo)
         self.about_dialog.show()
 
